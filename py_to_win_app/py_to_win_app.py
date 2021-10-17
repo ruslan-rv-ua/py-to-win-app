@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Iterable, Union
 
 
 class Project:
@@ -54,3 +55,18 @@ class Project:
     @property
     def dist_path(self) -> Path:
         return self._dist_path
+
+    def build(
+        self,
+        python_version: str,
+        pydist_dir: str = "pydist",
+        requirements_file: str = "requirements.txt",
+        extra_pip_install_args: Iterable[str] = (),
+        app_dir: str = None,
+        source_dir: str = None,
+        # TODO ignore_input: Iterable[str] = (),
+        show_console: bool = False,
+        icon_file: Union[str, Path, None] = None,
+        # TODO: download_dir: Union[str, Path] = None,
+    ) -> None:
+        pass
