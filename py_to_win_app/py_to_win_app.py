@@ -1,5 +1,8 @@
 from pathlib import Path
 from typing import Iterable, Union
+import re
+
+PYTHON_VERSION_REGEX = re.compile(r"^(\d+|x)\.(\d+|x)\.(\d+|x)$")
 
 
 class Project:
@@ -56,17 +59,39 @@ class Project:
     def dist_path(self) -> Path:
         return self._dist_path
 
+    @staticmethod
+    def _is_correct_version(python_version) -> bool:
+        return re.match(PYTHON_VERSION_REGEX, python_version)
+
     def build(
         self,
         python_version: str,
         pydist_dir: str = "pydist",
         requirements_file: str = "requirements.txt",
         extra_pip_install_args: Iterable[str] = (),
-        app_dir: str = None,
+        build_dir: str = None,
         source_dir: str = None,
         # TODO ignore_input: Iterable[str] = (),
         show_console: bool = False,
         icon_file: Union[str, Path, None] = None,
         # TODO: download_dir: Union[str, Path] = None,
     ) -> None:
-        pass
+        if not self._is_correct_version(python_version):
+            raise ValueError(
+                f"Specified python version `{python_version}` "
+                "does not have the correct format, it should be of format: "
+                "`x.x.x` where `x` is a positive number."
+            )
+
+        self._pydist_path = self._path / pydist_dir
+        self._requirements_path = self._path / requirements_file
+        self._build_path = (
+            self._path / "build" / build_dir
+            if build_dir is not None
+            else self._path / "build" / self._app_name
+        )
+        self._source_path = (
+            self._path / source_dir
+            if source_dir is not None
+            else self._path / self._app_name
+        )
