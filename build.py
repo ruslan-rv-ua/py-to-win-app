@@ -6,4 +6,8 @@ p = Project(
     input_dir=f"examples/{app_name}", main_file="main.py", app_name=app_name
 )
 
-print(p.input_path)
+p.build(
+    python_version="3.9.7",
+    requirements_file=f"examples/{app_name}/requirements.txt",
+)
+print(">>>")
