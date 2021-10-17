@@ -22,8 +22,6 @@ HEADER_NO_CONSOLE = (
     + """\'stderr-{}\'.format(os.path.basename(sys.argv[0]))), "w")"""
     + """\n\n"""
 )
-
-
 DEFAULT_IGNORE_PATTERNS = [
     "__pycache__",
     "*.pyc",
@@ -359,7 +357,7 @@ class Project:
     def build(
         self,
         python_version: str,
-        pydist_dir: str = "pydist",
+        pydist_dir: str = DEFAULT_PYDIST_DIR,
         requirements_file: str = "requirements.txt",
         extra_pip_install_args: Iterable[str] = (),
         build_dir: str = None,
@@ -430,3 +428,23 @@ class Project:
             f"\nBuild done! Folder `{self._build_path}` "
             "contains your runnable application!\n"
         )
+
+    def make_dist(self, file_name: str = None) -> Path:
+        if file_name is None:
+            file_name = self._app_name
+        zip_file_path = self._path / "dist" / file_name
+        builds_dir = self.path / 'build'
+        with log(f"Making zip archive {zip_file_path}"):
+            shutil.make_archive(
+                base_name=str(zip_file_path),
+                format="zip",
+                root_dir=str(builds_dir),
+                base_dir=str(self.build_path.relative_to(builds_dir)),
+            )
+        self._dist_path = zip_file_path
+        return zip_file_path
+
+    def delete_build(self) -> None:
+        with log(f"Removing build folder {self._build_path}!"):
+            shutil.rmtree(self.build_path)
+            self._build_path = self._source_path = self._pydist_path = None
