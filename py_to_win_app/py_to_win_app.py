@@ -1,9 +1,16 @@
 from pathlib import Path
 from typing import Iterable, Union
 import re
+from contextlib import contextmanager
 
 PYTHON_VERSION_REGEX = re.compile(r"^(\d+|x)\.(\d+|x)\.(\d+|x)$")
 
+
+@contextmanager
+def log(message):
+    print(message)
+    yield
+    print('Done.\n')
 
 class Project:
     def __init__(
