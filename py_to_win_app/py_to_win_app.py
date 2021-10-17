@@ -5,7 +5,7 @@ class Project:
     def __init__(
         self, input_dir: str, main_file: str, app_name: str = None
     ) -> None:
-        self._path = Path(__file__).parent
+        self._path = Path().cwd()
         self._input_path = self._path / input_dir
         self._app_name = app_name if app_name is not None else self._path.name
 
