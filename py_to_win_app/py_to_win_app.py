@@ -11,10 +11,10 @@ from typing import Iterable, Union
 import requests
 from genexe.generate_exe import generate_exe
 
-PYTHON_VERSION_REGEX = re.compile(r"^(\d+|x)\.(\d+|x)\.(\d+|x)$")
-GET_PIP_URL = "https://bootstrap.pypa.io/get-pip.py"
-PYTHON_URL = "https://www.python.org/ftp/python"
-HEADER_NO_CONSOLE = (
+_PYTHON_VERSION_REGEX = re.compile(r"^(\d+|x)\.(\d+|x)\.(\d+|x)$")
+_GET_PIP_URL = "https://bootstrap.pypa.io/get-pip.py"
+_PYTHON_URL = "https://www.python.org/ftp/python"
+_HEADER_NO_CONSOLE = (
     """import sys, os"""
     + """\nif sys.executable.endswith('pythonw.exe'):"""
     + """\n    sys.stdout = open(os.devnull, 'w')"""
@@ -22,16 +22,15 @@ HEADER_NO_CONSOLE = (
     + """\'stderr-{}\'.format(os.path.basename(sys.argv[0]))), "w")"""
     + """\n\n"""
 )
-DEFAULT_IGNORE_PATTERNS = [
+_DEFAULT_IGNORE_PATTERNS = [
     "__pycache__",
     "*.pyc",
     "build.py",
 ]
-DEFAULT_PYDIST_DIR: str = "pydist"
 
 
 @contextmanager
-def log(message):
+def _log(message):
     print(message)
     yield
     print("Done.\n")
@@ -94,7 +93,7 @@ class Project:
 
     @staticmethod
     def _is_correct_version(python_version) -> bool:
-        return re.match(PYTHON_VERSION_REGEX, python_version)
+        return re.match(_PYTHON_VERSION_REGEX, python_version)
 
     @staticmethod
     def _get_short_version(python_version: str) -> str:
@@ -104,7 +103,7 @@ class Project:
     def _execute_os_command(command: str, cwd: str = None) -> str:
         """Execute terminal command"""
 
-        with log(f"Running command: {command}"):
+        with _log(f"Running command: {command}"):
             process = subprocess.Popen(
                 command,
                 shell=True,
@@ -131,7 +130,7 @@ class Project:
                 raise Exception(command, exit_code, output)
 
     @staticmethod
-    def download_file(
+    def _download_file(
         url: str, local_file_path: Path, chunk_size: int = 128
     ) -> None:
         """Download streaming a file url to `local_file_path`"""
@@ -141,7 +140,7 @@ class Project:
                 fd.write(chunk)
 
     @staticmethod
-    def unzip(zip_file_path: Path, destination_dir_path: Path) -> None:
+    def _unzip(zip_file_path: Path, destination_dir_path: Path) -> None:
         with zipfile.ZipFile(zip_file_path, "r") as zip_file:
             zip_file.extractall(destination_dir_path)
 
@@ -149,11 +148,11 @@ class Project:
     def _download_python_dist(download_path: Path, python_version: str):
         embedded_file_name = f"python-{python_version}-embed-amd64.zip"
         embedded_file_path = download_path / embedded_file_name
-        with log("Downloading embedde python."):
+        with _log("Downloading embedde python."):
             if embedded_file_path.is_file():
                 return embedded_file_path
-            Project.download_file(
-                url=f"{PYTHON_URL}/{python_version}/{embedded_file_name}",
+            Project._download_file(
+                url=f"{_PYTHON_URL}/{python_version}/{embedded_file_name}",
                 local_file_path=embedded_file_path,
             )
             if not embedded_file_path.is_file():
@@ -163,11 +162,11 @@ class Project:
     @staticmethod
     def _download_getpippy(download_path: Path) -> Path:
         getpippy_file_path = download_path / "get-pip.py"
-        with log("Downloading `get-pip.py`."):
+        with _log("Downloading `get-pip.py`."):
             if getpippy_file_path.exists():
                 return getpippy_file_path
-            Project.download_file(
-                url=GET_PIP_URL, local_file_path=getpippy_file_path
+            Project._download_file(
+                url=_GET_PIP_URL, local_file_path=getpippy_file_path
             )
             if not getpippy_file_path.exists():
                 raise RuntimeError("Download failed!")
@@ -176,18 +175,18 @@ class Project:
     def _make_empty_build_dir(self) -> None:
         # Delete build folder if it exists
         if self._build_path.is_dir():
-            with log(
+            with _log(
                 f"Existing build directory found, "
                 f"removing contents from `{self._build_path}`"
             ):
                 shutil.rmtree(self._build_path)
         self._build_path.mkdir()
 
-    def extract_embedded(self, embedded_file_path: Path) -> None:
-        with log(
+    def _extract_embedded_python(self, embedded_file_path: Path) -> None:
+        with _log(
             f"Extracting `{embedded_file_path}` to `{self._pydist_path}`"
         ):
-            self.unzip(
+            self._unzip(
                 zip_file_path=embedded_file_path,
                 destination_dir_path=self._pydist_path,
             )
@@ -195,10 +194,10 @@ class Project:
     def _copy_source_files(self) -> None:
         ignore_patterns = []
         ignore_patterns.append(self._build_path.name)
-        ignore_patterns += DEFAULT_IGNORE_PATTERNS
+        ignore_patterns += _DEFAULT_IGNORE_PATTERNS
         if not self._source_path.is_dir():
             self._source_path.mkdir()
-        with log(
+        with _log(
             f"Copying files from `{self._input_path}` "
             + f"to `{self._source_path}`."
         ):
@@ -214,7 +213,7 @@ class Project:
         pth_file_name = f"python{short_version}._pth"  # python39._pth
         pth_file_path = self._pydist_path / pth_file_name
         pythonzip_file_name = f"python{short_version}.zip"  # python39.zip
-        with log(
+        with _log(
             f"Generating `{pth_file_path}` with uncommented `import site` line"
         ):
             if self._pydist_path == self._build_path:
@@ -239,17 +238,17 @@ class Project:
         pythonzip_file_name = f"python{short_version}.zip"  # python39.zip
         pythonzip_file_path = self._pydist_path / pythonzip_file_name
         pythonzip_dir_path = Path(pythonzip_file_path)
-        with log(
+        with _log(
             f"Extracting `{pythonzip_file_path}` to `{pythonzip_dir_path}`"
         ):
             pythonzip_file_path = pythonzip_file_path.rename(
                 pythonzip_file_path.with_suffix(".temp_zip")
             )
-            Project.unzip(pythonzip_file_path, pythonzip_dir_path)
+            Project._unzip(pythonzip_file_path, pythonzip_dir_path)
             pythonzip_file_path.unlink()
 
     def _install_pip(self) -> None:
-        with log("Installing `pip`"):
+        with _log("Installing `pip`"):
             Project._execute_os_command(
                 command="python.exe get-pip.py --no-warn-script-location",
                 cwd=str(self._pydist_path),
@@ -268,7 +267,7 @@ class Project:
         pass these additional arguments to the pip install command
         """
 
-        with log("Installing requirements"):
+        with _log("Installing requirements"):
             scripts_dir_path = self._pydist_path / "Scripts"
 
             if extra_pip_install_args:
@@ -323,7 +322,7 @@ class Project:
             f"{{EXE_DIR}}\\{relative_pydist_dir}\\{python_entrypoint} "
             + f"{{EXE_DIR}}\\{relative_source_dir}\\{self._main_file}"
         )
-        with log(f"Making startup exe file `{exe_file_path}`"):
+        with _log(f"Making startup exe file `{exe_file_path}`"):
             generate_exe(
                 target=exe_file_path,
                 command=command_str,
@@ -336,9 +335,9 @@ class Project:
                 main_file_content = main_file_path.read_text(
                     encoding="utf8", errors="surrogateescape"
                 )
-                if HEADER_NO_CONSOLE not in main_file_content:
+                if _HEADER_NO_CONSOLE not in main_file_content:
                     main_file_path.write_text(
-                        str(HEADER_NO_CONSOLE + main_file_content),
+                        str(_HEADER_NO_CONSOLE + main_file_content),
                         encoding="utf8",
                         errors="surrogateescape",
                     )
@@ -350,14 +349,14 @@ class Project:
         if new_file_name.lower().endswith(".exe"):  # new_name.exe -> new_name
             new_file_name = new_file_name.lower().rstrip(".exe")
         new_exe_path = self.exe_path.with_stem(new_file_name)
-        with log(f"Renaming {self.exe_path} -> {new_exe_path}"):
+        with _log(f"Renaming {self.exe_path} -> {new_exe_path}"):
             self._exe_path = self._exe_path.rename(new_exe_path)
         return self.exe_path
 
     def build(
         self,
         python_version: str,
-        pydist_dir: str = DEFAULT_PYDIST_DIR,
+        pydist_dir: str = "pydist",
         requirements_file: str = "requirements.txt",
         extra_pip_install_args: Iterable[str] = (),
         build_dir: str = None,
@@ -396,13 +395,13 @@ class Project:
         embedded_file_path = self._download_python_dist(
             download_path=download_path, python_version=python_version
         )
-        self.extract_embedded(embedded_file_path)
+        self._extract_embedded_python(embedded_file_path)
 
         # download `get_pip.py` and copy it to build directory
         getpippy_file_path = self._download_getpippy(
             download_path=download_path
         )
-        with log(
+        with _log(
             f"Coping `{getpippy_file_path}` file to `{self._pydist_path}`"
         ):
             shutil.copy2(getpippy_file_path, self._pydist_path)
@@ -433,8 +432,8 @@ class Project:
         if file_name is None:
             file_name = self._app_name
         zip_file_path = self._path / "dist" / file_name
-        builds_dir = self.path / 'build'
-        with log(f"Making zip archive {zip_file_path}"):
+        builds_dir = self.path / "build"
+        with _log(f"Making zip archive {zip_file_path}"):
             shutil.make_archive(
                 base_name=str(zip_file_path),
                 format="zip",
@@ -445,6 +444,6 @@ class Project:
         return zip_file_path
 
     def delete_build(self) -> None:
-        with log(f"Removing build folder {self._build_path}!"):
+        with _log(f"Removing build folder {self._build_path}!"):
             shutil.rmtree(self.build_path)
             self._build_path = self._source_path = self._pydist_path = None
