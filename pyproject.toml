@@ -14,6 +14,8 @@ gen-exe = "^0.2.1"
 pre-commit = "^2.15.0"
 black = {version = "^21.9b0", allow-prereleases = true}
 flake8 = "^4.0.1"
+lazydocs = "^0.4.8"
+Markdown = "^3.3.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
