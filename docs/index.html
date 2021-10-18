@@ -31,9 +31,9 @@
 			<div class="col mt-1">
 				<!-- markdownlint-disable -->
 
-<p><a href="..\py_to_win_app\py_to_win_app\Project#L40"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<p><a href="..\py_to_win_app\py_to_win_app\Project#L39"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
 <h1><kbd>class</kbd> <code>Project</code></h1>
-<p><a href="..\py_to_win_app\py_to_win_app\__init__#L41"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<p><a href="..\py_to_win_app\py_to_win_app\__init__#L40"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
 <h3><kbd>method</kbd> <code>Project.__init__</code></h3>
 <p><code>python
 __init__(input_dir: str, main_file: str, app_name: str = None) → None</code></p>
@@ -56,50 +56,47 @@ __init__(input_dir: str, main_file: str, app_name: str = None) → None</code></
 <hr>
 <h3><kbd>property</kbd> Project.source_path</h3>
 <hr>
-<p><a href="..\py_to_win_app\py_to_win_app\build#L357"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<p><a href="..\py_to_win_app\py_to_win_app\build#L356"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
 <h2><kbd>method</kbd> <code>Project.build</code></h2>
 <p><code>python
 build(
     python_version: str,
-    pydist_dir: str = 'pydist',
     requirements_file: str = 'requirements.txt',
     extra_pip_install_args: Iterable[str] = (),
     build_dir: str = None,
+    pydist_dir: str = 'pydist',
     source_dir: str = None,
     show_console: bool = False,
     exe_name: str = None,
     icon_file: Optional[str, pathlib.Path] = None
 ) → None</code></p>
+<p>TODO </p>
+<p><strong>Args:</strong></p>
+<ul>
+<li><b><code>python_version</code></b> (str):  Embedded python version </li>
+<li><b><code>requirements_file</code></b> (str, optional):  Path to <code>requirements.txt</code> file. Defaults to <code>"requirements.txt"</code>. </li>
+<li><b><code>extra_pip_install_args</code></b> (Iterable[str], optional):  Arguments to be appended to the <code>pip install</code> command during installation of requirements. Defaults to <code>()</code>. </li>
+<li><b><code>build_dir</code></b> (str, optional):  Directory to place build to. If <code>None</code> then <code>app_name</code> attribute will be used. Defaults to <code>None</code>. </li>
+<li><b><code>pydist_dir</code></b> (str, optional):  Subdirectory where to place Python embedde interpreter. Defaults to <code>"pydist"</code>. </li>
+<li><b><code>source_dir</code></b> (str, optional):  Subdirectory where to place source code. If <code>None</code> then <code>app_nam</code> attribute will be used. Defaults to <code>None</code>. </li>
+<li><b><code>show_console</code></b> (bool, optional):  Show console window or not. Defaults to <code>False</code>. </li>
+<li><b><code>exe_name</code></b> (str, optional):  Name of <code>.exe</code> file. If <code>None</code> then name will be the same as <code>main_file</code>. Defaults to <code>None</code>. </li>
+<li><b><code>icon_file</code></b> (Union[str, Path, None], optional):  Path to icon file. Defaults to <code>None</code>. </li>
+</ul>
+<p><strong>Raises:</strong></p>
+<ul>
+<li><b><code>ValueError</code></b>:  If wrong Python version provided. </li>
+</ul>
 <hr>
-<p><a href="..\py_to_win_app\py_to_win_app\delete_build#L447"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<p><a href="..\py_to_win_app\py_to_win_app\delete_build#L462"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
 <h2><kbd>method</kbd> <code>Project.delete_build</code></h2>
 <p><code>python
 delete_build() → None</code></p>
 <hr>
-<p><a href="..\py_to_win_app\py_to_win_app\download_file#L133"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
-<h2><kbd>method</kbd> <code>Project.download_file</code></h2>
-<p><code>python
-download_file(
-    url: str,
-    local_file_path: pathlib.Path,
-    chunk_size: int = 128
-) → None</code></p>
-<p>Download streaming a file url to <code>local_file_path</code> </p>
-<hr>
-<p><a href="..\py_to_win_app\py_to_win_app\extract_embedded#L186"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
-<h2><kbd>method</kbd> <code>Project.extract_embedded</code></h2>
-<p><code>python
-extract_embedded(embedded_file_path: pathlib.Path) → None</code></p>
-<hr>
-<p><a href="..\py_to_win_app\py_to_win_app\make_dist#L432"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<p><a href="..\py_to_win_app\py_to_win_app\make_dist#L447"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
 <h2><kbd>method</kbd> <code>Project.make_dist</code></h2>
 <p><code>python
 make_dist(file_name: str = None) → Path</code></p>
-<hr>
-<p><a href="..\py_to_win_app\py_to_win_app\unzip#L143"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
-<h2><kbd>method</kbd> <code>Project.unzip</code></h2>
-<p><code>python
-unzip(zip_file_path: pathlib.Path, destination_dir_path: pathlib.Path) → None</code></p>
 <hr>
 <p><em>This file was automatically generated via <a href="https://github.com/ml-tooling/lazydocs">lazydocs</a>.</em></p>
 			</div>
