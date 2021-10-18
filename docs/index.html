@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="Ruslan Iskov">
+
+  <title>py-to-win-app</title>
+
+  <!-- Bootstrap core CSS -->
+  <!-- link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@forevolve/bootstrap-dark@1.0.0/dist/css/bootstrap-dark.min.css" />
+
+
+  <!-- Custom fonts for this template -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <!--link href="css/style.min.css" rel="stylesheet"-->
+
+</head>
+
+<body id="page-top">
+
+  <!-- Page Content -->
+	<div class="container">
+		<div class="row">
+			<div class="col mt-1">
+				<!-- markdownlint-disable -->
+
+<p><a href="..\py_to_win_app\py_to_win_app\Project#L40"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h1><kbd>class</kbd> <code>Project</code></h1>
+<p><a href="..\py_to_win_app\py_to_win_app\__init__#L41"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h3><kbd>method</kbd> <code>Project.__init__</code></h3>
+<p><code>python
+__init__(input_dir: str, main_file: str, app_name: str = None) → None</code></p>
+<hr>
+<h3><kbd>property</kbd> Project.app_name</h3>
+<hr>
+<h3><kbd>property</kbd> Project.build_path</h3>
+<hr>
+<h3><kbd>property</kbd> Project.dist_path</h3>
+<hr>
+<h3><kbd>property</kbd> Project.exe_path</h3>
+<hr>
+<h3><kbd>property</kbd> Project.input_path</h3>
+<hr>
+<h3><kbd>property</kbd> Project.path</h3>
+<hr>
+<h3><kbd>property</kbd> Project.pydist_path</h3>
+<hr>
+<h3><kbd>property</kbd> Project.requirements_path</h3>
+<hr>
+<h3><kbd>property</kbd> Project.source_path</h3>
+<hr>
+<p><a href="..\py_to_win_app\py_to_win_app\build#L357"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h2><kbd>method</kbd> <code>Project.build</code></h2>
+<p><code>python
+build(
+    python_version: str,
+    pydist_dir: str = 'pydist',
+    requirements_file: str = 'requirements.txt',
+    extra_pip_install_args: Iterable[str] = (),
+    build_dir: str = None,
+    source_dir: str = None,
+    show_console: bool = False,
+    exe_name: str = None,
+    icon_file: Optional[str, pathlib.Path] = None
+) → None</code></p>
+<hr>
+<p><a href="..\py_to_win_app\py_to_win_app\delete_build#L447"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h2><kbd>method</kbd> <code>Project.delete_build</code></h2>
+<p><code>python
+delete_build() → None</code></p>
+<hr>
+<p><a href="..\py_to_win_app\py_to_win_app\download_file#L133"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h2><kbd>method</kbd> <code>Project.download_file</code></h2>
+<p><code>python
+download_file(
+    url: str,
+    local_file_path: pathlib.Path,
+    chunk_size: int = 128
+) → None</code></p>
+<p>Download streaming a file url to <code>local_file_path</code> </p>
+<hr>
+<p><a href="..\py_to_win_app\py_to_win_app\extract_embedded#L186"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h2><kbd>method</kbd> <code>Project.extract_embedded</code></h2>
+<p><code>python
+extract_embedded(embedded_file_path: pathlib.Path) → None</code></p>
+<hr>
+<p><a href="..\py_to_win_app\py_to_win_app\make_dist#L432"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h2><kbd>method</kbd> <code>Project.make_dist</code></h2>
+<p><code>python
+make_dist(file_name: str = None) → Path</code></p>
+<hr>
+<p><a href="..\py_to_win_app\py_to_win_app\unzip#L143"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<h2><kbd>method</kbd> <code>Project.unzip</code></h2>
+<p><code>python
+unzip(zip_file_path: pathlib.Path, destination_dir_path: pathlib.Path) → None</code></p>
+<hr>
+<p><em>This file was automatically generated via <a href="https://github.com/ml-tooling/lazydocs">lazydocs</a>.</em></p>
+			</div>
+		</div>
+	</div>
+
+	<!-- Bootstrap core JavaScript -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.30.1/js/jquery.tablesorter.min.js'></script>
+
+	<!-- Custom scripts for this template -->
+	<!--script src="js/resume.min.js"></script-->
+
+	<!--#! script type="text/javascript" src="https://milankyncl.github.io/jquery-copy-to-clipboard/jquery.copy-to-clipboard.js"></script-->
+</body>
+
+</html>
