@@ -408,7 +408,7 @@ class Project:
             shutil.copy2(getpippy_file_path, self._pydist_path)
 
         self._patch_pth_file(python_version=python_version)
-        self._extract_pythonzip(python_version=python_version)
+        # self._extract_pythonzip(python_version=python_version)
 
         self._install_pip()
         self._install_requirements(
