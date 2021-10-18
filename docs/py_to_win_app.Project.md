@@ -15,9 +15,15 @@
 __init__(input_dir: str, main_file: str, app_name: str = None) → None
 ```
 
+TODO
 
 
 
+**Args:**
+
+ - <b>`input_dir`</b> (str):  Directory where your source files are.
+ - <b>`main_file`</b> (str):  Path to entry point, e.g. `main.py`
+ - <b>`app_name`</b> (str, optional):  App's name. If `None` then project's directory name will be used. Defaults to `None`.
 
 
 ---
@@ -96,7 +102,7 @@ __init__(input_dir: str, main_file: str, app_name: str = None) → None
 
 ---
 
-<a href="..\py_to_win_app\py_to_win_app\build#L356"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="..\py_to_win_app\py_to_win_app\build#L363"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>method</kbd> `Project.build`
 
@@ -138,7 +144,7 @@ TODO
 
 ---
 
-<a href="..\py_to_win_app\py_to_win_app\delete_build#L462"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="..\py_to_win_app\py_to_win_app\delete_build#L469"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>method</kbd> `Project.delete_build`
 
@@ -152,7 +158,7 @@ delete_build() → None
 
 ---
 
-<a href="..\py_to_win_app\py_to_win_app\make_dist#L447"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="..\py_to_win_app\py_to_win_app\make_dist#L454"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>method</kbd> `Project.make_dist`
 
