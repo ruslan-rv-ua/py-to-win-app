@@ -11,8 +11,8 @@
   <title>py-to-win-app</title>
 
   <!-- Bootstrap core CSS -->
-  <!-- link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@forevolve/bootstrap-dark@1.0.0/dist/css/bootstrap-dark.min.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@forevolve/bootstrap-dark@1.0.0/dist/css/bootstrap-dark.min.css" / -->
 
 
   <!-- Custom fonts for this template -->
@@ -32,53 +32,85 @@
 				<!-- markdownlint-disable -->
 
 <p><a href="..\py_to_win_app\py_to_win_app\Project#L39"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+
 <h1><kbd>class</kbd> <code>Project</code></h1>
+
 <p><a href="..\py_to_win_app\py_to_win_app\__init__#L40"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+
 <h3><kbd>method</kbd> <code>Project.__init__</code></h3>
-<p><code>python
-__init__(input_dir: str, main_file: str, app_name: str = None) → None</code></p>
+
+<div class="codehilite"><pre><span></span><code><span class="fm">__init__</span><span class="p">(</span><span class="n">input_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">main_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">app_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="err">→</span> <span class="kc">None</span>
+</code></pre></div>
+
 <p>TODO </p>
+
 <p><strong>Args:</strong></p>
+
 <ul>
 <li><b><code>input_dir</code></b> (str):  Directory where your source files are. </li>
 <li><b><code>main_file</code></b> (str):  Path to entry point, e.g. <code>main.py</code> </li>
 <li><b><code>app_name</code></b> (str, optional):  App's name. If <code>None</code> then project's directory name will be used. Defaults to <code>None</code>. </li>
 </ul>
-<hr>
+
+<hr />
+
 <h3><kbd>property</kbd> Project.app_name</h3>
-<hr>
+
+<hr />
+
 <h3><kbd>property</kbd> Project.build_path</h3>
-<hr>
+
+<hr />
+
 <h3><kbd>property</kbd> Project.dist_path</h3>
-<hr>
+
+<hr />
+
 <h3><kbd>property</kbd> Project.exe_path</h3>
-<hr>
+
+<hr />
+
 <h3><kbd>property</kbd> Project.input_path</h3>
-<hr>
+
+<hr />
+
 <h3><kbd>property</kbd> Project.path</h3>
-<hr>
+
+<hr />
+
 <h3><kbd>property</kbd> Project.pydist_path</h3>
-<hr>
+
+<hr />
+
 <h3><kbd>property</kbd> Project.requirements_path</h3>
-<hr>
+
+<hr />
+
 <h3><kbd>property</kbd> Project.source_path</h3>
-<hr>
+
+<hr />
+
 <p><a href="..\py_to_win_app\py_to_win_app\build#L363"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+
 <h2><kbd>method</kbd> <code>Project.build</code></h2>
-<p><code>python
-build(
-    python_version: str,
-    requirements_file: str = 'requirements.txt',
-    extra_pip_install_args: Iterable[str] = (),
-    build_dir: str = None,
-    pydist_dir: str = 'pydist',
-    source_dir: str = None,
-    show_console: bool = False,
-    exe_name: str = None,
-    icon_file: Optional[str, pathlib.Path] = None
-) → None</code></p>
+
+<div class="codehilite"><pre><span></span><code><span class="n">build</span><span class="p">(</span>
+    <span class="n">python_version</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">requirements_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;requirements.txt&#39;</span><span class="p">,</span>
+    <span class="n">extra_pip_install_args</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+    <span class="n">build_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">pydist_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;pydist&#39;</span><span class="p">,</span>
+    <span class="n">source_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">show_console</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">exe_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">icon_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="err">→</span> <span class="kc">None</span>
+</code></pre></div>
+
 <p>TODO </p>
+
 <p><strong>Args:</strong></p>
+
 <ul>
 <li><b><code>python_version</code></b> (str):  Embedded python version </li>
 <li><b><code>requirements_file</code></b> (str, optional):  Path to <code>requirements.txt</code> file. Defaults to <code>"requirements.txt"</code>. </li>
@@ -90,22 +122,35 @@ build(
 <li><b><code>exe_name</code></b> (str, optional):  Name of <code>.exe</code> file. If <code>None</code> then name will be the same as <code>main_file</code>. Defaults to <code>None</code>. </li>
 <li><b><code>icon_file</code></b> (Union[str, Path, None], optional):  Path to icon file. Defaults to <code>None</code>. </li>
 </ul>
+
 <p><strong>Raises:</strong></p>
+
 <ul>
 <li><b><code>ValueError</code></b>:  If wrong Python version provided. </li>
 </ul>
-<hr>
+
+<hr />
+
 <p><a href="..\py_to_win_app\py_to_win_app\delete_build#L469"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+
 <h2><kbd>method</kbd> <code>Project.delete_build</code></h2>
-<p><code>python
-delete_build() → None</code></p>
-<hr>
+
+<div class="codehilite"><pre><span></span><code><span class="n">delete_build</span><span class="p">()</span> <span class="err">→</span> <span class="kc">None</span>
+</code></pre></div>
+
+<hr />
+
 <p><a href="..\py_to_win_app\py_to_win_app\make_dist#L454"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+
 <h2><kbd>method</kbd> <code>Project.make_dist</code></h2>
-<p><code>python
-make_dist(file_name: str = None) → Path</code></p>
-<hr>
+
+<div class="codehilite"><pre><span></span><code><span class="n">make_dist</span><span class="p">(</span><span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="err">→</span> <span class="n">Path</span>
+</code></pre></div>
+
+<hr />
+
 <p><em>This file was automatically generated via <a href="https://github.com/ml-tooling/lazydocs">lazydocs</a>.</em></p>
+
 			</div>
 		</div>
 	</div>
