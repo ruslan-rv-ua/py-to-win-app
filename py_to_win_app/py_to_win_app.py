@@ -428,7 +428,14 @@ class Project:
             "contains your runnable application!\n"
         )
 
-    def make_dist(self, file_name: str = None) -> Path:
+    def _delete_build_dir(self) -> None:
+        with _log(f"Removing build folder {self._build_path}!"):
+            shutil.rmtree(self.build_path)
+            self._build_path = self._source_path = self._pydist_path = None
+
+    def make_dist(
+        self, file_name: str = None, delete_build_dir: bool = False
+    ) -> Path:
         if file_name is None:
             file_name = self._app_name
         zip_file_path = self._path / "dist" / file_name
@@ -441,9 +448,8 @@ class Project:
                 base_dir=str(self.build_path.relative_to(builds_dir)),
             )
         self._dist_path = zip_file_path
-        return zip_file_path
 
-    def delete_build(self) -> None:
-        with _log(f"Removing build folder {self._build_path}!"):
-            shutil.rmtree(self.build_path)
-            self._build_path = self._source_path = self._pydist_path = None
+        if delete_build_dir:
+            self._delete_build_dir()
+
+        return zip_file_path
