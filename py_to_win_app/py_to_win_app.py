@@ -42,6 +42,13 @@ class Project:
     def __init__(
         self, input_dir: str, main_file: str, app_name: str = None
     ) -> None:
+        """TODO
+
+        Args:
+            input_dir (str): Directory where your source files are.
+            main_file (str): Path to entry point, e.g. `main.py`
+            app_name (str, optional): App's name. If `None` then project's directory name will be used. Defaults to `None`.
+        """  # noqa
         self._path = Path().cwd()
         self._input_path = self._path / input_dir
         self._main_file = main_file
