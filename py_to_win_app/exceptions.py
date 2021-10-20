@@ -6,9 +6,9 @@ class InvalidPythonVersion(ProjectException):
     pass
 
 
-class WrongInputDir(ProjectException):
+class InputDirError(ProjectException):
     pass
 
 
-class WrongMainFile(ProjectException):
+class MainFileError(ProjectException):
     pass

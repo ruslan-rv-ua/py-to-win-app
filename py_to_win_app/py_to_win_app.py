@@ -11,7 +11,7 @@ from typing import Iterable, Union
 import requests
 from genexe.generate_exe import generate_exe
 
-from .exceptions import InvalidPythonVersion
+from .exceptions import InvalidPythonVersion, InputDirError, MainFileError
 
 __all__ = ["Project"]
 
@@ -44,10 +44,11 @@ class Project:
     def __init__(
         self,
         *,
-        input_dir: str,
-        main_file: str,
+        path: Union[str, Path] = None,
         name: str = None,
         version: str = None,
+        input_dir: str = None,
+        main_file: str = None,
     ) -> None:
         """TODO
 
@@ -57,19 +58,40 @@ class Project:
             input_dir (str): Directory where your source files are.
             main_file (str): Path to entry point, e.g. `main.py`
         """  # noqa
-        self._path = Path().cwd().absolute()
+
+        if path is not None:
+            self._path = Path(path).resolve().absolute()
+        else:
+            self._path = Path().cwd().absolute()
 
         # make folders for build and dist
-        self._build_subdir_path = self._path / "build"
+        self._build_subdir_path = Path.cwd() / "build"
         self._build_subdir_path.mkdir(exist_ok=True)
-        self._dist_subdir_path = self._path / "dist"
+        self._dist_subdir_path = Path.cwd() / "dist"
         self._dist_subdir_path.mkdir(exist_ok=True)
 
         self._name = name
         self._version = version
 
-        self._input_path = self._path / input_dir
-        self._main_file = main_file
+        if input_dir is None:
+            self._input_path = self._discover_input_dir()
+        else:
+            self._input_path = self._path / input_dir
+            if not self._input_path.is_dir():
+                raise InputDirError(
+                    f"Specified input dir `{input_dir}` does not exists"
+                )
+
+        if main_file is None:
+            self._main_file = self._discover_main_file()
+        else:
+            self._main_file = main_file
+            main_file_path = self.path / main_file
+            if not main_file_path.is_file():
+                raise MainFileError(
+                    f"Specified main file `{main_file}` "
+                    + f"is not found in `{self._input_path}`"
+                )
 
         self._build_path: Path = None
         self._source_path: Path = None
@@ -211,7 +233,7 @@ class Project:
         return self.name + (f"-{self.version}" if self.version else "")
 
     @property
-    def input_path(self) -> None:
+    def input_path(self) -> Path:
         return self._input_path
 
     @property
@@ -237,6 +259,40 @@ class Project:
     @property
     def dist_path(self) -> Path:
         return self._dist_path
+
+    def _discover_input_dir(self) -> Path:
+        with _log(f"Input dir not specified.\nDiscovering in `{self.path}`"):
+            names = [
+                f"{self.name}",
+                f"{self.name.replace('-', '_')}",
+                f"{self.name.replace('-', '')}",
+                "src",
+                "source",
+                "sources",
+            ]
+            for name in names:
+                print(f"Tring `{name}`...")
+                input_path = self.path / name
+                if input_path.is_dir():
+                    return input_path
+            raise InputDirError  # TODO: message
+
+    def _discover_main_file(self) -> Path:
+        with _log(
+            f"Main file not specified.\nDiscovering in `{self.input_path}`"
+        ):
+            names = [
+                f"{self.name}.py",
+                f"{self.name.replace('-', '_')}.py",
+                f"{self.name.replace('-', '')}.py",
+                "main.py",
+            ]
+            for name in names:
+                print(f"Tring `{name}`...")
+                main_file_path = self.input_path / name
+                if main_file_path.is_file():
+                    return main_file_path
+            raise MainFileError  # TODO: message
 
     @staticmethod
     def _is_correct_version(python_version) -> bool:
