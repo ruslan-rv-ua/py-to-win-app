@@ -51,9 +51,10 @@ class Project:
         """TODO
 
         Args:
+            name (str, optional): App's name. If `None` then project's folder name will be used. Defaults to `None`.
+            version (str, optional): App's version. Defaults to `None`.
             input_dir (str): Directory where your source files are.
             main_file (str): Path to entry point, e.g. `main.py`
-            app_name (str, optional): App's name. If `None` then project's directory name will be used. Defaults to `None`.
         """  # noqa
         self._path = Path().cwd().absolute()
 
@@ -62,6 +63,9 @@ class Project:
         self._build_subdir_path.mkdir(exist_ok=True)
         self._dist_subdir_path = self._path / "dist"
         self._dist_subdir_path.mkdir(exist_ok=True)
+
+        self._name = name
+        self._version = version
 
         self._input_path = self._path / input_dir
         self._main_file = main_file
@@ -192,6 +196,19 @@ class Project:
     @property
     def path(self) -> Path:
         return self._path
+
+    @property
+    def name(self) -> str:
+        return self._name if self._name else self.path.name
+
+    @property
+    def version(self) -> str:
+        return self._version if self._version else ""
+
+    @property
+    def full_name(self) -> str:
+        """<name>-<version>"""
+        return self.name + (f"-{self.version}" if self.version else "")
 
     @property
     def input_path(self) -> None:
