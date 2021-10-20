@@ -516,6 +516,19 @@ class Project:
     ) -> Path:
         """Make the startup exe file needed to run the script"""
 
+        if not show_console:
+            main_file_copy_path = self._source_path / self._main_file_name
+            with _log(f"No console. Patching `{main_file_copy_path}`"):
+                main_file_content = main_file_copy_path.read_text(
+                    encoding="utf8", errors="surrogateescape"
+                )
+                if _HEADER_NO_CONSOLE not in main_file_content:
+                    main_file_copy_path.write_text(
+                        str(_HEADER_NO_CONSOLE + main_file_content),
+                        encoding="utf8",
+                        errors="surrogateescape",
+                    )
+
         relative_pydist_dir = self.pydist_path.relative_to(self.build_path)
         relative_source_dir = self.source_path.relative_to(self.build_path)
         exe_file_path = self.build_path / Path(
@@ -526,6 +539,7 @@ class Project:
             f"{{EXE_DIR}}\\{relative_pydist_dir}\\{python_entrypoint} "
             + f"{{EXE_DIR}}\\{relative_source_dir}\\{self._main_file_name}"
         )
+
         with _log(f"Making startup exe file `{exe_file_path}`"):
             generate_exe(
                 target=exe_file_path,
@@ -533,18 +547,6 @@ class Project:
                 icon_file=icon_file_path,
                 show_console=show_console,
             )
-
-            if not show_console:
-                main_file_path = self._source_path / self._main_file_name
-                main_file_content = main_file_path.read_text(
-                    encoding="utf8", errors="surrogateescape"
-                )
-                if _HEADER_NO_CONSOLE not in main_file_content:
-                    main_file_path.write_text(
-                        str(_HEADER_NO_CONSOLE + main_file_content),
-                        encoding="utf8",
-                        errors="surrogateescape",
-                    )
 
             self._exe_path = exe_file_path
             return exe_file_path
