@@ -5,6 +5,7 @@
         "--line-length=79"
     ],
     "conventionalCommits.scopes": [
-        "make_dist"
+        "make_dist",
+        "examples"
     ]
 }
