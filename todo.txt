@@ -1,4 +1,4 @@
-- * in methods parameters!
+- make simple application
 - name of project
 - app_version property
 - dist_name property = app_name + app_version

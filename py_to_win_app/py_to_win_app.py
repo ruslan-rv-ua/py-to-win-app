@@ -40,7 +40,13 @@ def _log(message):
 
 class Project:
     def __init__(
-        self, input_dir: str, main_file: str, app_name: str = None
+        self,
+        *,
+        input_dir: str,
+        main_file: str,
+        name: str = None,
+        version: str = None,
+        app_name: str = None,
     ) -> None:
         """TODO
 
@@ -49,7 +55,7 @@ class Project:
             main_file (str): Path to entry point, e.g. `main.py`
             app_name (str, optional): App's name. If `None` then project's directory name will be used. Defaults to `None`.
         """  # noqa
-        self._path = Path().cwd()
+        self._path = Path().cwd().absolute()
         self._input_path = self._path / input_dir
         self._main_file = main_file
         self._app_name = app_name if app_name is not None else self._path.name
@@ -66,6 +72,7 @@ class Project:
 
     def build(
         self,
+        *,
         python_version: str,
         pydist_dir: str = "pydist",
         requirements_file: str = "requirements.txt",
@@ -157,7 +164,7 @@ class Project:
         )
 
     def make_dist(
-        self, file_name: str = None, delete_build_dir: bool = False
+        self, *, file_name: str = None, delete_build_dir: bool = False
     ) -> Path:
         if file_name is None:
             file_name = self._app_name
