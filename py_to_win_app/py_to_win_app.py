@@ -83,15 +83,16 @@ class Project:
                 )
 
         if main_file is None:
-            self._main_file = self._discover_main_file()
+            self._main_file_path = self._discover_main_file()
+            self._main_file_name = self._main_file_path.name
         else:
-            self._main_file = main_file
-            main_file_path = self.path / main_file
-            if not main_file_path.is_file():
+            self._main_file_path = self.input_path / main_file
+            if not self._main_file_path.is_file():
                 raise MainFileError(
                     f"Specified main file `{main_file}` "
-                    + f"is not found in `{self._input_path}`"
+                    + f"is not found in `{self.input_path}`"
                 )
+            self._main_file_name = main_file
 
         self._build_path: Path = None
         self._source_path: Path = None
@@ -515,15 +516,15 @@ class Project:
     ) -> Path:
         """Make the startup exe file needed to run the script"""
 
-        relative_pydist_dir = self._pydist_path.relative_to(self._build_path)
-        relative_source_dir = self._source_path.relative_to(self._build_path)
-        exe_file_path = self._build_path / Path(self._main_file).with_suffix(
-            ".exe"
-        )
+        relative_pydist_dir = self.pydist_path.relative_to(self.build_path)
+        relative_source_dir = self.source_path.relative_to(self.build_path)
+        exe_file_path = self.build_path / Path(
+            self._main_file_name
+        ).with_suffix(".exe")
         python_entrypoint = "python.exe"
         command_str = (
             f"{{EXE_DIR}}\\{relative_pydist_dir}\\{python_entrypoint} "
-            + f"{{EXE_DIR}}\\{relative_source_dir}\\{self._main_file}"
+            + f"{{EXE_DIR}}\\{relative_source_dir}\\{self._main_file_name}"
         )
         with _log(f"Making startup exe file `{exe_file_path}`"):
             generate_exe(
@@ -534,7 +535,7 @@ class Project:
             )
 
             if not show_console:
-                main_file_path = self._source_path / self._main_file
+                main_file_path = self._source_path / self._main_file_name
                 main_file_content = main_file_path.read_text(
                     encoding="utf8", errors="surrogateescape"
                 )

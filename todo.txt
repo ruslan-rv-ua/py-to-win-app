@@ -1,6 +1,5 @@
 - make simple application
-- discover input_dir
-- discover main_file
+- fix exe file name
 - requirements from pyproject.toml
 - project from pyproject.toml
 - actions logger with logging to file
