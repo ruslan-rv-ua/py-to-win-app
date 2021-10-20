@@ -46,7 +46,6 @@ class Project:
         main_file: str,
         name: str = None,
         version: str = None,
-        app_name: str = None,
     ) -> None:
         """TODO
 
@@ -69,7 +68,6 @@ class Project:
 
         self._input_path = self._path / input_dir
         self._main_file = main_file
-        self._app_name = app_name if app_name is not None else self._path.name
 
         self._build_path: Path = None
         self._source_path: Path = None
@@ -121,14 +119,14 @@ class Project:
         if build_dir is not None:
             self._build_path = self._build_subdir_path / build_dir
         else:
-            self._build_path = self._build_subdir_path / self._app_name
+            self._build_path = self._build_subdir_path / self.full_name
 
         self._pydist_path = self._build_path / pydist_dir
 
         if source_dir is not None:
             self._source_path = self._build_path / source_dir
         else:
-            self._source_path = self._build_path / self._app_name
+            self._source_path = self._build_path / self.name
 
         self._make_empty_build_dir()
         self._copy_source_files()
@@ -175,7 +173,7 @@ class Project:
         self, *, file_name: str = None, delete_build_dir: bool = False
     ) -> Path:
         if file_name is None:
-            file_name = self._app_name
+            file_name = self.full_name
         zip_file_path = self._dist_subdir_path / file_name
         with _log(f"Making zip archive {zip_file_path}"):
             shutil.make_archive(
@@ -213,10 +211,6 @@ class Project:
     @property
     def input_path(self) -> None:
         return self._input_path
-
-    @property
-    def app_name(self) -> str:
-        return self._app_name
 
     @property
     def build_path(self) -> Path:
