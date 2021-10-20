@@ -3,5 +3,8 @@
     "python.linting.enabled": true,
 	"python.formatting.blackArgs": [
         "--line-length=79"
+    ],
+    "conventionalCommits.scopes": [
+        "make_dist"
     ]
 }
