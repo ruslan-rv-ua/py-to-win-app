@@ -112,7 +112,7 @@ class Project:
         source_dir: str = None,
         # TODO ignore_input: Iterable[str] = (),
         show_console: bool = False,
-        exe_name: str = None,
+        exe_file_name: str = None,
         icon_file: Union[str, Path, None] = None,
         # TODO: download_dir: Union[str, Path] = None,
     ) -> None:
@@ -181,13 +181,19 @@ class Project:
             extra_pip_install_args=list(extra_pip_install_args),
         )
 
+        # make exe
+        if exe_file_name is None:
+            exe_file_name = self.name
+        else:
+            if exe_file_name.lower().endswith(".exe"):
+                # other_name.exe -> other_name
+                exe_file_name = exe_file_name.lower().rstrip(".exe")
         icon_file_path = Path(icon_file) if icon_file is not None else None
         self._make_startup_exe(
-            show_console=show_console, icon_file_path=icon_file_path
+            show_console=show_console,
+            exe_file_name=exe_file_name,
+            icon_file_path=icon_file_path,
         )
-
-        if exe_name is not None:
-            self._rename_exe_file(new_file_name=exe_name)
 
         print(
             f"\nBuild done! Folder `{self._build_path}` "
@@ -512,6 +518,7 @@ class Project:
     def _make_startup_exe(
         self,
         show_console: bool,
+        exe_file_name: str,
         icon_file_path: Union[Path, None],
     ) -> Path:
         """Make the startup exe file needed to run the script"""
@@ -531,9 +538,7 @@ class Project:
 
         relative_pydist_dir = self.pydist_path.relative_to(self.build_path)
         relative_source_dir = self.source_path.relative_to(self.build_path)
-        exe_file_path = self.build_path / Path(
-            self._main_file_name
-        ).with_suffix(".exe")
+        exe_file_path = self.build_path / f"{exe_file_name}.exe"
         python_entrypoint = "python.exe"
         command_str = (
             f"{{EXE_DIR}}\\{relative_pydist_dir}\\{python_entrypoint} "
@@ -550,14 +555,6 @@ class Project:
 
             self._exe_path = exe_file_path
             return exe_file_path
-
-    def _rename_exe_file(self, new_file_name: str) -> Path:
-        if new_file_name.lower().endswith(".exe"):  # new_name.exe -> new_name
-            new_file_name = new_file_name.lower().rstrip(".exe")
-        new_exe_path = self.exe_path.with_stem(new_file_name)
-        with _log(f"Renaming {self.exe_path} -> {new_exe_path}"):
-            self._exe_path = self._exe_path.rename(new_exe_path)
-        return self.exe_path
 
     def _delete_build_dir(self) -> None:
         with _log(f"Removing build folder {self._build_path}!"):
