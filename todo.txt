@@ -1,0 +1,9 @@
+- * in methods parameters!
+- name of project
+- app_version property
+- dist_name property = app_name + app_version
+- discover input_dir
+- discover main_file
+- actions logger with logging to file
+- project from pyproject.toml
+- requirements from pyproject.toml
