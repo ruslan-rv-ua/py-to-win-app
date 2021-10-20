@@ -11,6 +11,8 @@ from typing import Iterable, Union
 import requests
 from genexe.generate_exe import generate_exe
 
+__all__ = ["Project"]
+
 _PYTHON_VERSION_REGEX = re.compile(r"^(\d+|x)\.(\d+|x)\.(\d+|x)$")
 _GET_PIP_URL = "https://bootstrap.pypa.io/get-pip.py"
 _PYTHON_URL = "https://www.python.org/ftp/python"
@@ -54,6 +56,102 @@ class Project:
 
         (self._path / "dist").mkdir(exist_ok=True)
         self._dist_path: Path = None
+
+    def build(
+        self,
+        python_version: str,
+        pydist_dir: str = "pydist",
+        requirements_file: str = "requirements.txt",
+        extra_pip_install_args: Iterable[str] = (),
+        build_dir: str = None,
+        source_dir: str = None,
+        # TODO ignore_input: Iterable[str] = (),
+        show_console: bool = False,
+        exe_name: str = None,
+        icon_file: Union[str, Path, None] = None,
+        # TODO: download_dir: Union[str, Path] = None,
+    ) -> None:
+        if not self._is_correct_version(python_version):
+            raise ValueError(
+                f"Specified python version `{python_version}` "
+                "does not have the correct format, it should be of format: "
+                "`x.x.x` where `x` is a positive number."
+            )
+
+        self._requirements_path = self._path / requirements_file
+        if build_dir is not None:
+            self._build_path = self._path / "build" / build_dir
+        else:
+            self._build_path = self._path / "build" / self._app_name
+
+        self._pydist_path = self._build_path / pydist_dir
+
+        if source_dir is not None:
+            self._source_path = self._build_path / source_dir
+        else:
+            self._source_path = self._build_path / self._app_name
+
+        self._make_empty_build_dir()
+        self._copy_source_files()
+
+        # download embedded python and extract it to build directory
+        download_path = Path.home() / "Downloads"
+        embedded_file_path = self._download_python_dist(
+            download_path=download_path, python_version=python_version
+        )
+        self._extract_embedded_python(embedded_file_path)
+
+        # download `get_pip.py` and copy it to build directory
+        getpippy_file_path = self._download_getpippy(
+            download_path=download_path
+        )
+        with _log(
+            f"Coping `{getpippy_file_path}` file to `{self._pydist_path}`"
+        ):
+            shutil.copy2(getpippy_file_path, self._pydist_path)
+
+        self._patch_pth_file(python_version=python_version)
+        # self._extract_pythonzip(python_version=python_version)
+
+        self._install_pip()
+        self._install_requirements(
+            requirements_file_path=self._requirements_path,
+            extra_pip_install_args=list(extra_pip_install_args),
+        )
+
+        icon_file_path = Path(icon_file) if icon_file is not None else None
+        self._make_startup_exe(
+            show_console=show_console, icon_file_path=icon_file_path
+        )
+
+        if exe_name is not None:
+            self._rename_exe_file(new_file_name=exe_name)
+
+        print(
+            f"\nBuild done! Folder `{self._build_path}` "
+            "contains your runnable application!\n"
+        )
+
+    def make_dist(
+        self, file_name: str = None, delete_build_dir: bool = False
+    ) -> Path:
+        if file_name is None:
+            file_name = self._app_name
+        zip_file_path = self._path / "dist" / file_name
+        builds_dir = self.path / "build"
+        with _log(f"Making zip archive {zip_file_path}"):
+            shutil.make_archive(
+                base_name=str(zip_file_path),
+                format="zip",
+                root_dir=str(builds_dir),
+                base_dir=str(self.build_path.relative_to(builds_dir)),
+            )
+        self._dist_path = zip_file_path
+
+        if delete_build_dir:
+            self._delete_build_dir()
+
+        return zip_file_path
 
     @property
     def path(self) -> Path:
@@ -353,103 +451,7 @@ class Project:
             self._exe_path = self._exe_path.rename(new_exe_path)
         return self.exe_path
 
-    def build(
-        self,
-        python_version: str,
-        pydist_dir: str = "pydist",
-        requirements_file: str = "requirements.txt",
-        extra_pip_install_args: Iterable[str] = (),
-        build_dir: str = None,
-        source_dir: str = None,
-        # TODO ignore_input: Iterable[str] = (),
-        show_console: bool = False,
-        exe_name: str = None,
-        icon_file: Union[str, Path, None] = None,
-        # TODO: download_dir: Union[str, Path] = None,
-    ) -> None:
-        if not self._is_correct_version(python_version):
-            raise ValueError(
-                f"Specified python version `{python_version}` "
-                "does not have the correct format, it should be of format: "
-                "`x.x.x` where `x` is a positive number."
-            )
-
-        self._requirements_path = self._path / requirements_file
-        if build_dir is not None:
-            self._build_path = self._path / "build" / build_dir
-        else:
-            self._build_path = self._path / "build" / self._app_name
-
-        self._pydist_path = self._build_path / pydist_dir
-
-        if source_dir is not None:
-            self._source_path = self._build_path / source_dir
-        else:
-            self._source_path = self._build_path / self._app_name
-
-        self._make_empty_build_dir()
-        self._copy_source_files()
-
-        # download embedded python and extract it to build directory
-        download_path = Path.home() / "Downloads"
-        embedded_file_path = self._download_python_dist(
-            download_path=download_path, python_version=python_version
-        )
-        self._extract_embedded_python(embedded_file_path)
-
-        # download `get_pip.py` and copy it to build directory
-        getpippy_file_path = self._download_getpippy(
-            download_path=download_path
-        )
-        with _log(
-            f"Coping `{getpippy_file_path}` file to `{self._pydist_path}`"
-        ):
-            shutil.copy2(getpippy_file_path, self._pydist_path)
-
-        self._patch_pth_file(python_version=python_version)
-        # self._extract_pythonzip(python_version=python_version)
-
-        self._install_pip()
-        self._install_requirements(
-            requirements_file_path=self._requirements_path,
-            extra_pip_install_args=list(extra_pip_install_args),
-        )
-
-        icon_file_path = Path(icon_file) if icon_file is not None else None
-        self._make_startup_exe(
-            show_console=show_console, icon_file_path=icon_file_path
-        )
-
-        if exe_name is not None:
-            self._rename_exe_file(new_file_name=exe_name)
-
-        print(
-            f"\nBuild done! Folder `{self._build_path}` "
-            "contains your runnable application!\n"
-        )
-
     def _delete_build_dir(self) -> None:
         with _log(f"Removing build folder {self._build_path}!"):
             shutil.rmtree(self.build_path)
             self._build_path = self._source_path = self._pydist_path = None
-
-    def make_dist(
-        self, file_name: str = None, delete_build_dir: bool = False
-    ) -> Path:
-        if file_name is None:
-            file_name = self._app_name
-        zip_file_path = self._path / "dist" / file_name
-        builds_dir = self.path / "build"
-        with _log(f"Making zip archive {zip_file_path}"):
-            shutil.make_archive(
-                base_name=str(zip_file_path),
-                format="zip",
-                root_dir=str(builds_dir),
-                base_dir=str(self.build_path.relative_to(builds_dir)),
-            )
-        self._dist_path = zip_file_path
-
-        if delete_build_dir:
-            self._delete_build_dir()
-
-        return zip_file_path
