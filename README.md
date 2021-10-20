@@ -8,11 +8,11 @@ TODO: description
 
 Install as dev dependency:
 
-    `poetry add --dev py-to-win-app`
+    poetry add --dev py-to-win-app
 
 Or using pip:
 
-    `pip install py-to-win-app`
+    pip install py-to-win-app
 
 ## Usage
 
@@ -61,7 +61,7 @@ Or using pip:
     You can find runnable windows application in `build/flask-desktop` directory.
     Distribution `flask-desktop.zip`
 
-More examples:
+#### More examples:
 
 - [telecode](https://github.com/ruslan-rv-ua/telecode) — desktop wxPython application
 
