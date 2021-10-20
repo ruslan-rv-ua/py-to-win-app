@@ -56,18 +56,22 @@ class Project:
             app_name (str, optional): App's name. If `None` then project's directory name will be used. Defaults to `None`.
         """  # noqa
         self._path = Path().cwd().absolute()
+
+        # make folders for build and dist
+        self._build_subdir_path = self._path / "build"
+        self._build_subdir_path.mkdir(exist_ok=True)
+        self._dist_subdir_path = self._path / "dist"
+        self._dist_subdir_path.mkdir(exist_ok=True)
+
         self._input_path = self._path / input_dir
         self._main_file = main_file
         self._app_name = app_name if app_name is not None else self._path.name
 
-        (self._path / "build").mkdir(exist_ok=True)
         self._build_path: Path = None
         self._source_path: Path = None
         self._exe_path: Path = None
         self._pydist_path: Path = None
         self._requirements_path: Path = None
-
-        (self._path / "dist").mkdir(exist_ok=True)
         self._dist_path: Path = None
 
     def build(
@@ -111,9 +115,9 @@ class Project:
 
         self._requirements_path = self._path / requirements_file
         if build_dir is not None:
-            self._build_path = self._path / "build" / build_dir
+            self._build_path = self._build_subdir_path / build_dir
         else:
-            self._build_path = self._path / "build" / self._app_name
+            self._build_path = self._build_subdir_path / self._app_name
 
         self._pydist_path = self._build_path / pydist_dir
 
@@ -168,14 +172,15 @@ class Project:
     ) -> Path:
         if file_name is None:
             file_name = self._app_name
-        zip_file_path = self._path / "dist" / file_name
-        builds_dir = self.path / "build"
+        zip_file_path = self._dist_subdir_path / file_name
         with _log(f"Making zip archive {zip_file_path}"):
             shutil.make_archive(
                 base_name=str(zip_file_path),
                 format="zip",
-                root_dir=str(builds_dir),
-                base_dir=str(self.build_path.relative_to(builds_dir)),
+                root_dir=str(self._build_subdir_path),
+                base_dir=str(
+                    self.build_path.relative_to(self._build_subdir_path)
+                ),
             )
         self._dist_path = zip_file_path
 
