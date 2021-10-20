@@ -1,9 +1,6 @@
 - make simple application
-- name of project
-- app_version property
-- dist_name property = app_name + app_version
 - discover input_dir
 - discover main_file
-- actions logger with logging to file
-- project from pyproject.toml
 - requirements from pyproject.toml
+- project from pyproject.toml
+- actions logger with logging to file

@@ -11,6 +11,8 @@ from typing import Iterable, Union
 import requests
 from genexe.generate_exe import generate_exe
 
+from .exceptions import InvalidPythonVersion
+
 __all__ = ["Project"]
 
 _PYTHON_VERSION_REGEX = re.compile(r"^(\d+|x)\.(\d+|x)\.(\d+|x)$")
@@ -105,11 +107,11 @@ class Project:
             icon_file (Union[str, Path, None], optional): Path to icon file. Defaults to `None`.
 
         Raises:
-            ValueError: If wrong Python version provided.
+            InvalidPythonVersion: If incorrect Python version provided.
         """  # noqa
 
         if not self._is_correct_version(python_version):
-            raise ValueError(
+            raise InvalidPythonVersion(
                 f"Specified python version `{python_version}` "
                 "does not have the correct format, it should be of format: "
                 "`x.x.x` where `x` is a positive number."
