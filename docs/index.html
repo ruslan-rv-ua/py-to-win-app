@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="Ruslan Iskov">
+
+  <title>py-to-win-app</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@forevolve/bootstrap-dark@1.0.0/dist/css/bootstrap-dark.min.css" / -->
+
+
+  <!-- Custom fonts for this template -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <!--link href="css/style.min.css" rel="stylesheet"-->
+
+</head>
+
+<body id="page-top">
+
+  <!-- Page Content -->
+	<div class="container">
+		<div class="row">
+			<div class="col mt-1">
+				<!-- markdownlint-disable -->
+
+<p><a href="..\py_to_win_app\py_to_win_app.py#L39"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+
+<h1><kbd>class</kbd> <code>Project</code></h1>
+
+<p><a href="..\py_to_win_app\py_to_win_app.py#L40"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+
+<h3><kbd>method</kbd> <code>Project.__init__</code></h3>
+
+<pre><code>__init__(input_dir: str, main_file: str, app_name: str = None) → None
+</code></pre>
+
+<p>TODO </p>
+
+<p><strong>Args:</strong></p>
+
+<ul>
+<li><b><code>input_dir</code></b> (str):  Directory where your source files are. </li>
+<li><b><code>main_file</code></b> (str):  Path to entry point, e.g. <code>main.py</code> </li>
+<li><b><code>app_name</code></b> (str, optional):  App's name. If <code>None</code> then project's directory name will be used. Defaults to <code>None</code>. </li>
+</ul>
+
+<hr />
+
+<h3><kbd>property</kbd> Project.app_name</h3>
+
+<hr />
+
+<h3><kbd>property</kbd> Project.build_path</h3>
+
+<hr />
+
+<h3><kbd>property</kbd> Project.dist_path</h3>
+
+<hr />
+
+<h3><kbd>property</kbd> Project.exe_path</h3>
+
+<hr />
+
+<h3><kbd>property</kbd> Project.input_path</h3>
+
+<hr />
+
+<h3><kbd>property</kbd> Project.path</h3>
+
+<hr />
+
+<h3><kbd>property</kbd> Project.pydist_path</h3>
+
+<hr />
+
+<h3><kbd>property</kbd> Project.requirements_path</h3>
+
+<hr />
+
+<h3><kbd>property</kbd> Project.source_path</h3>
+
+<hr />
+
+<p><a href="..\py_to_win_app\py_to_win_app.py#L363"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+
+<h2><kbd>method</kbd> <code>Project.build</code></h2>
+
+<pre><code>build(
+    python_version: str,
+    requirements_file: str = 'requirements.txt',
+    extra_pip_install_args: Iterable[str] = (),
+    build_dir: str = None,
+    pydist_dir: str = 'pydist',
+    source_dir: str = None,
+    show_console: bool = False,
+    exe_name: str = None,
+    icon_file: Optional[str, pathlib.Path] = None
+) → None
+</code></pre>
+
+<p>TODO </p>
+
+<p><strong>Args:</strong></p>
+
+<ul>
+<li><b><code>python_version</code></b> (str):  Embedded python version </li>
+<li><b><code>requirements_file</code></b> (str, optional):  Path to <code>requirements.txt</code> file. Defaults to <code>"requirements.txt"</code>. </li>
+<li><b><code>extra_pip_install_args</code></b> (Iterable[str], optional):  Arguments to be appended to the <code>pip install</code> command during installation of requirements. Defaults to <code>()</code>. </li>
+<li><b><code>build_dir</code></b> (str, optional):  Directory to place build to. If <code>None</code> then <code>app_name</code> attribute will be used. Defaults to <code>None</code>. </li>
+<li><b><code>pydist_dir</code></b> (str, optional):  Subdirectory where to place Python embedde interpreter. Defaults to <code>"pydist"</code>. </li>
+<li><b><code>source_dir</code></b> (str, optional):  Subdirectory where to place source code. If <code>None</code> then <code>app_nam</code> attribute will be used. Defaults to <code>None</code>. </li>
+<li><b><code>show_console</code></b> (bool, optional):  Show console window or not. Defaults to <code>False</code>. </li>
+<li><b><code>exe_name</code></b> (str, optional):  Name of <code>.exe</code> file. If <code>None</code> then name will be the same as <code>main_file</code>. Defaults to <code>None</code>. </li>
+<li><b><code>icon_file</code></b> (Union[str, Path, None], optional):  Path to icon file. Defaults to <code>None</code>. </li>
+</ul>
+
+<p><strong>Raises:</strong></p>
+
+<ul>
+<li><b><code>ValueError</code></b>:  If wrong Python version provided. </li>
+</ul>
+
+<hr />
+
+<p><a href="..\py_to_win_app\py_to_win_app.py#L469"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+
+<h2><kbd>method</kbd> <code>Project.delete_build</code></h2>
+
+<pre><code>delete_build() → None
+</code></pre>
+
+<hr />
+
+<p><a href="..\py_to_win_app\py_to_win_app.py#L454"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+
+<h2><kbd>method</kbd> <code>Project.make_dist</code></h2>
+
+<pre><code>make_dist(file_name: str = None) → Path
+</code></pre>
+
+<hr />
+
+<p><em>This file was automatically generated via <a href="https://github.com/ml-tooling/lazydocs">lazydocs</a>.</em></p>
+
+			</div>
+		</div>
+	</div>
+
+	<!-- Bootstrap core JavaScript -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.30.1/js/jquery.tablesorter.min.js'></script>
+
+	<!-- Custom scripts for this template -->
+	<!--script src="js/resume.min.js"></script-->
+
+	<!--#! script type="text/javascript" src="https://milankyncl.github.io/jquery-copy-to-clipboard/jquery.copy-to-clipboard.js"></script-->
+</body>
+
+</html>

@@ -18,4 +18,4 @@ index_html_file.write_text(html, encoding="utf8")
 
 md_file.unlink()
 
-print('Documentation generated!')
+print('Documentation updated! Now you can add it to commit.')
