@@ -13,5 +13,6 @@ repos:
         name: make_docs
         entry: python make_docs.py
         language: system
-        types: [python]
         pass_filenames: false
+        always_run: true
+        verbose: false
