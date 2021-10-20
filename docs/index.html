@@ -107,9 +107,31 @@
 ) → None
 </code></pre>
 
+<p>TODO </p>
+
+<p><strong>Args:</strong></p>
+
+<ul>
+<li><b><code>python_version</code></b> (str):  Embedded python version </li>
+<li><b><code>requirements_file</code></b> (str, optional):  Path to <code>requirements.txt</code> file. Defaults to <code>"requirements.txt"</code>. </li>
+<li><b><code>extra_pip_install_args</code></b> (Iterable[str], optional):  Arguments to be appended to the <code>pip install</code> command during installation of requirements. Defaults to <code>()</code>. </li>
+<li><b><code>build_dir</code></b> (str, optional):  Directory to place build to. If <code>None</code> then <code>app_name</code> attribute will be used. Defaults to <code>None</code>. </li>
+<li><b><code>pydist_dir</code></b> (str, optional):  Subdirectory where to place Python embedde interpreter. Defaults to <code>"pydist"</code>. </li>
+<li><b><code>source_dir</code></b> (str, optional):  Subdirectory where to place source code. If <code>None</code> then <code>app_nam</code> attribute will be used. Defaults to <code>None</code>. </li>
+<li><b><code>show_console</code></b> (bool, optional):  Show console window or not. Defaults to <code>False</code>. </li>
+<li><b><code>exe_name</code></b> (str, optional):  Name of <code>.exe</code> file. If <code>None</code> then name will be the same as <code>main_file</code>. Defaults to <code>None</code>. </li>
+<li><b><code>icon_file</code></b> (Union[str, Path, None], optional):  Path to icon file. Defaults to <code>None</code>. </li>
+</ul>
+
+<p><strong>Raises:</strong></p>
+
+<ul>
+<li><b><code>ValueError</code></b>:  If wrong Python version provided. </li>
+</ul>
+
 <hr />
 
-<p><a href="..\py_to_win_app\py_to_win_app.py#L142"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<p><a href="..\py_to_win_app\py_to_win_app.py#L159"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
 
 <h2><kbd>method</kbd> <code>Project.make_dist</code></h2>
 

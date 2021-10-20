@@ -78,6 +78,23 @@ class Project:
         icon_file: Union[str, Path, None] = None,
         # TODO: download_dir: Union[str, Path] = None,
     ) -> None:
+        """TODO
+
+        Args:
+            python_version (str): Embedded python version
+            requirements_file (str, optional): Path to `requirements.txt` file. Defaults to `"requirements.txt"`.
+            extra_pip_install_args (Iterable[str], optional): Arguments to be appended to the `pip install` command during installation of requirements. Defaults to `()`.
+            build_dir (str, optional): Directory to place build to. If `None` then `app_name` attribute will be used. Defaults to `None`.
+            pydist_dir (str, optional): Subdirectory where to place Python embedde interpreter. Defaults to `"pydist"`.
+            source_dir (str, optional): Subdirectory where to place source code. If `None` then `app_nam` attribute will be used. Defaults to `None`.
+            show_console (bool, optional): Show console window or not. Defaults to `False`.
+            exe_name (str, optional): Name of `.exe` file. If `None` then name will be the same as `main_file`. Defaults to `None`.
+            icon_file (Union[str, Path, None], optional): Path to icon file. Defaults to `None`.
+
+        Raises:
+            ValueError: If wrong Python version provided.
+        """  # noqa
+
         if not self._is_correct_version(python_version):
             raise ValueError(
                 f"Specified python version `{python_version}` "
