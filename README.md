@@ -24,13 +24,13 @@ Or using pip:
 
     `poetry export -f requirements.txt -o requirements.txt --without-hashes`
 
-1. Create file `build.py` with following content:
+1. In root directory of your project create file `build.py` with following content:
 
     ```python
     from py_to_win_app import Project
 
     project = Project(
-        input_dir="my-project",  # directory where your source files are
+        input_dir="my_project",  # directory where your source files are
         main_file="main.py"
     )
 

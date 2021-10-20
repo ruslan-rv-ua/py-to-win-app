@@ -1,5 +1,4 @@
 - make simple application
-- fix exe file name
 - requirements from pyproject.toml
 - project from pyproject.toml
 - actions logger with logging to file
