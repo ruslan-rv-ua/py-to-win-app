@@ -11,5 +11,4 @@ p.build(
     requirements_file=f"examples/{app_name}/requirements.txt",
     exe_name=app_name,
 )
-p.make_dist()
-p.delete_build()
+p.make_dist(delete_build_dir=True)

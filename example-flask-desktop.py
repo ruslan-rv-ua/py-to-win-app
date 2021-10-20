@@ -12,4 +12,3 @@ p.build(
     exe_name=app_name,
 )
 p.make_dist()
-p.delete_build()
