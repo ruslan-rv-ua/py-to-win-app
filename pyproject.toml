@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "py-to-win-app"
-version = "0.1.0"
+version = "0.0.1"
 description = "Make runnable apps from your python scripts!"
 authors = ["Ruslan Iskov <ruslan.rv.ua@gmail.com>"]
 license = "MIT"
