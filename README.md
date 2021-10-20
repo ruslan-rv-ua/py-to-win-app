@@ -4,17 +4,17 @@
 
 TODO: description
 
-## Usage
+## Installation
 
-In the root directory of your project:
+Install as dev dependency:
 
-1. Install:
+    `poetry add --dev py-to-win-app`
+
+Or using pip:
 
     `pip install py-to-win-app`
 
-    Using `poetry`:
-
-    `poetry add --dev py-to-win-app`
+## Usage
 
 1. Make `requirements.txt` file:
 
@@ -24,7 +24,7 @@ In the root directory of your project:
 
     `poetry export -f requirements.txt -o requirements.txt --without-hashes`
 
-1. Create fiel `build.py` with following content:
+1. Create file `build.py` with following content:
 
     ```python
     from py_to_win_app import Project
