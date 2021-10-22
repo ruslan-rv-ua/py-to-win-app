@@ -49,6 +49,7 @@ class Project:
         version: str = None,
         input_dir: str = None,
         main_file: str = None,
+        requirements: Union[Iterable[str], str, Path] = "requirements.txt",
     ) -> None:
         """TODO
 
@@ -94,6 +95,8 @@ class Project:
                 )
             self._main_file_name = main_file
 
+        self._requirements = requirements
+
         self._build_path: Path = None
         self._source_path: Path = None
         self._exe_path: Path = None
@@ -106,7 +109,6 @@ class Project:
         *,
         python_version: str,
         pydist_dir: str = "pydist",
-        requirements_file: str = "requirements.txt",
         extra_pip_install_args: Iterable[str] = (),
         build_dir: str = None,
         source_dir: str = None,
@@ -140,26 +142,18 @@ class Project:
                 "`x.x.x` where `x` is a positive number."
             )
 
-        self._requirements_path = self._path / requirements_file
         if build_dir is not None:
             self._build_path = self._build_subdir_path / build_dir
         else:
             self._build_path = self._build_subdir_path / self.full_name
 
         self._pydist_path = self._build_path / pydist_dir
+        self._scripts_dir_path = self.pydist_path / "Scripts"
 
         if source_dir is not None:
             self._source_path = self._build_path / source_dir
         else:
             self._source_path = self._build_path / self.name
-
-        self._scripts_dir_path = self.pydist_path / "Scripts"
-        if extra_pip_install_args:
-            self._extra_pip_install_args_str = " " + " ".join(
-                extra_pip_install_args
-            )
-        else:
-            self._extra_pip_install_args_str = ""
 
         self._make_empty_build_dir()
         self._copy_source_files()
@@ -185,7 +179,7 @@ class Project:
 
         self._install_pip()
         self._install_requirements(
-            requirements_file_path=self._requirements_path,
+            extra_pip_install_args=extra_pip_install_args
         )
 
         # make exe
@@ -473,56 +467,41 @@ class Project:
             if not self._scripts_dir_path.exists():
                 raise RuntimeError("Error installing `pip` with `get-pip.py`")
 
-    def _install_module(self, module: str) -> None:
-        """Install given module
-
-        Args:
-            module (str): module to install
-            extra_pip_install_args (Iterable[str]): pass these additional arguments to the pip install command
-        """  # noqa
-
-        with _log(f"Installing {module}:"):
-            cmd = "pip3.exe install --no-cache-dir "
-            "--no-warn-script-location "
-            f"{module}{self._extra_pip_install_args_str}"
-            try:
-                Project._execute_os_command(
-                    command=cmd, cwd=str(self._scripts_dir_path)
-                )
-            except Exception:
-                print("FAILED TO INSTALL ", module)
-                with (self.build_path / "FAILED_TO_INSTALL_MODULES.txt").open(
-                    mode="a"
-                ) as f:
-                    f.write(module + "\n")
-
-    def _install_requirements(
-        self,
-        requirements_file_path: Path,
-    ):
+    def _install_requirements(self, extra_pip_install_args: Iterable):
         """
-        Install the modules from requirements.txt file
-        - extra_pip_install_args (optional `List[str]`) :
-
+        Install modules
         """
+        if isinstance(self._requirements, (str, Path)):
+            # load from `requirements.txt`
+            requirements_txt_path = Path(self._requirements)
+            if not requirements_txt_path.is_absolute():
+                requirements_txt_path = self.path / requirements_txt_path
+            modules = requirements_txt_path.read_text().splitlines()
+        else:  # is Iterable
+            modules = self._requirements
 
-        with _log("Installing requirements"):
-            try:
+        if extra_pip_install_args:
+            extra_pip_install_args_str = " " + " ".join(extra_pip_install_args)
+        else:
+            extra_pip_install_args_str = ""
+
+        for module in modules:
+            with _log(f"Installing {module}:"):
                 cmd = (
-                    "pip3.exe install "
-                    + "--no-cache-dir --no-warn-script-location "
-                    + f"-r {str(requirements_file_path)}"
-                    + f"{self._extra_pip_install_args_str}"
+                    "pip3.exe install --no-cache-dir "
+                    + "--no-warn-script-location "
+                    + f"{module}{extra_pip_install_args_str}"
                 )
-                Project._execute_os_command(
-                    command=cmd, cwd=str(self._scripts_dir_path)
-                )
-                return
-            except Exception:
-                print("Installing modules one by one")
-                modules = requirements_file_path.read_text().splitlines()
-                for module in modules:
-                    self._install_module(module)
+                try:
+                    Project._execute_os_command(
+                        command=cmd, cwd=str(self._scripts_dir_path)
+                    )
+                except Exception:
+                    print("FAILED TO INSTALL ", module)
+                    with (
+                        self.build_path / "FAILED_TO_INSTALL_MODULES.txt"
+                    ).open(mode="a") as f:
+                        f.write(module + "\n")
 
     def _make_startup_exe(
         self,

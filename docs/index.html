@@ -44,7 +44,8 @@
     name: str = None,
     version: str = None,
     input_dir: str = None,
-    main_file: str = None
+    main_file: str = None,
+    requirements: Union[Iterable[str], str, pathlib.Path] = 'requirements.txt'
 ) → None
 </code></pre>
 
@@ -107,14 +108,13 @@
 
 <hr />
 
-<p><a href="..\py_to_win_app\py_to_win_app.py#L104"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<p><a href="..\py_to_win_app\py_to_win_app.py#L107"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
 
 <h2><kbd>method</kbd> <code>Project.build</code></h2>
 
 <pre><code>build(
     python_version: str,
     pydist_dir: str = 'pydist',
-    requirements_file: str = 'requirements.txt',
     extra_pip_install_args: Iterable[str] = (),
     build_dir: str = None,
     source_dir: str = None,
@@ -148,7 +148,7 @@
 
 <hr />
 
-<p><a href="..\py_to_win_app\py_to_win_app.py#L210"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<p><a href="..\py_to_win_app\py_to_win_app.py#L204"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
 
 <h2><kbd>method</kbd> <code>Project.make_dist</code></h2>
 
