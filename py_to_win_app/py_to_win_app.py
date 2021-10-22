@@ -153,6 +153,14 @@ class Project:
         else:
             self._source_path = self._build_path / self.name
 
+        self._scripts_dir_path = self.pydist_path / "Scripts"
+        if extra_pip_install_args:
+            self._extra_pip_install_args_str = " " + " ".join(
+                extra_pip_install_args
+            )
+        else:
+            self._extra_pip_install_args_str = ""
+
         self._make_empty_build_dir()
         self._copy_source_files()
 
@@ -178,7 +186,6 @@ class Project:
         self._install_pip()
         self._install_requirements(
             requirements_file_path=self._requirements_path,
-            extra_pip_install_args=list(extra_pip_install_args),
         )
 
         # make exe
@@ -461,33 +468,26 @@ class Project:
         with _log("Installing `pip`"):
             Project._execute_os_command(
                 command="python.exe get-pip.py --no-warn-script-location",
-                cwd=str(self._pydist_path),
+                cwd=str(self.pydist_path),
             )
-            if not (self._pydist_path / "Scripts").exists():
-                raise RuntimeError("Can not install `pip` with `get-pip.py`!")
+            if not self._scripts_dir_path.exists():
+                raise RuntimeError("Error installing `pip` with `get-pip.py`")
 
-    def _install_module(
-        self, module: str, extra_pip_install_args: Iterable[str] = ()
-    ) -> None:
+    def _install_module(self, module: str) -> None:
         """Install given module
 
         Args:
             module (str): module to install
             extra_pip_install_args (Iterable[str]): pass these additional arguments to the pip install command
-        """
-
-        scripts_dir_path = self._pydist_path / "Scripts"
-        if extra_pip_install_args:
-            extra_args_str = " " + " ".join(extra_pip_install_args)
-        else:
-            extra_args_str = ""
+        """  # noqa
 
         with _log(f"Installing {module}:"):
             cmd = "pip3.exe install --no-cache-dir "
-            f"--no-warn-script-location {module}{extra_args_str}"
+            "--no-warn-script-location "
+            f"{module}{self._extra_pip_install_args_str}"
             try:
                 Project._execute_os_command(
-                    command=cmd, cwd=str(scripts_dir_path)
+                    command=cmd, cwd=str(self._scripts_dir_path)
                 )
             except Exception:
                 print("FAILED TO INSTALL ", module)
@@ -499,7 +499,6 @@ class Project:
     def _install_requirements(
         self,
         requirements_file_path: Path,
-        extra_pip_install_args: list[str],
     ):
         """
         Install the modules from requirements.txt file
@@ -508,21 +507,15 @@ class Project:
         """
 
         with _log("Installing requirements"):
-            scripts_dir_path = self._pydist_path / "Scripts"
-
-            if extra_pip_install_args:
-                extra_args_str = " " + " ".join(extra_pip_install_args)
-            else:
-                extra_args_str = ""
-
             try:
                 cmd = (
                     "pip3.exe install "
                     + "--no-cache-dir --no-warn-script-location "
-                    + f"-r {str(requirements_file_path)}{extra_args_str}"
+                    + f"-r {str(requirements_file_path)}"
+                    + f"{self._extra_pip_install_args_str}"
                 )
                 Project._execute_os_command(
-                    command=cmd, cwd=str(scripts_dir_path)
+                    command=cmd, cwd=str(self._scripts_dir_path)
                 )
                 return
             except Exception:
