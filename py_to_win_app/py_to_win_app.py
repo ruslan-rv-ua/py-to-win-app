@@ -34,10 +34,10 @@ _DEFAULT_IGNORE_PATTERNS = [
 
 
 @contextmanager
-def _log(message):
+def _log(message: str, exit_message: str = "Done") -> None:
     print(message)
     yield
-    print("Done.\n")
+    print(exit_message, end="\n\n")
 
 
 class Project:
