@@ -466,6 +466,36 @@ class Project:
             if not (self._pydist_path / "Scripts").exists():
                 raise RuntimeError("Can not install `pip` with `get-pip.py`!")
 
+    def _install_module(
+        self, module: str, extra_pip_install_args: Iterable[str] = ()
+    ) -> None:
+        """Install given module
+
+        Args:
+            module (str): module to install
+            extra_pip_install_args (Iterable[str]): pass these additional arguments to the pip install command
+        """
+
+        scripts_dir_path = self._pydist_path / "Scripts"
+        if extra_pip_install_args:
+            extra_args_str = " " + " ".join(extra_pip_install_args)
+        else:
+            extra_args_str = ""
+
+        with _log(f"Installing {module}:"):
+            cmd = "pip3.exe install --no-cache-dir "
+            f"--no-warn-script-location {module}{extra_args_str}"
+            try:
+                Project._execute_os_command(
+                    command=cmd, cwd=str(scripts_dir_path)
+                )
+            except Exception:
+                print("FAILED TO INSTALL ", module)
+                with (self.build_path / "FAILED_TO_INSTALL_MODULES.txt").open(
+                    mode="a"
+                ) as f:
+                    f.write(module + "\n")
+
     def _install_requirements(
         self,
         requirements_file_path: Path,
@@ -474,7 +504,7 @@ class Project:
         """
         Install the modules from requirements.txt file
         - extra_pip_install_args (optional `List[str]`) :
-        pass these additional arguments to the pip install command
+
         """
 
         with _log("Installing requirements"):
@@ -499,21 +529,7 @@ class Project:
                 print("Installing modules one by one")
                 modules = requirements_file_path.read_text().splitlines()
                 for module in modules:
-                    try:
-                        print(f"Installing {module} ...", end="", flush=True)
-                        cmd = "pip3.exe install --no-cache-dir "
-                        f"--no-warn-script-location {module}{extra_args_str}"
-                        Project._execute_os_command(
-                            command=cmd, cwd=str(scripts_dir_path)
-                        )
-                        print("done")
-                    except Exception:
-                        print("FAILED TO INSTALL ", module)
-                        with (
-                            self._build_path / "FAILED_TO_INSTALL_MODULES.txt"
-                        ).open(mode="a") as f:
-                            f.write(module + "\n")
-                    print("\n")
+                    self._install_module(module)
 
     def _make_startup_exe(
         self,
