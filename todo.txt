@@ -1,4 +1,0 @@
-- make simple application
-- requirements from pyproject.toml
-- project from pyproject.toml
-- actions logger with logging to file
