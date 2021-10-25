@@ -6,12 +6,14 @@ import sys
 import zipfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterable, Union
+from typing import Iterable, Optional, Union
 
 import requests
+import tomli
 from genexe.generate_exe import generate_exe
+from txtoml.txtoml import constrain
 
-from .exceptions import InvalidPythonVersion, InputDirError, MainFileError
+from .exceptions import InputDirError, InvalidPythonVersion, MainFileError
 
 __all__ = ["Project"]
 
@@ -104,6 +106,36 @@ class Project:
         self._requirements_path: Path = None
         self._dist_path: Path = None
 
+    @classmethod
+    def from_pyproject(
+        cls,
+        pyproject_toml: Union[str, Path] = "pyproject.toml",
+        input_dir: Optional[str] = None,
+        main_file: Optional[str] = None,
+    ) -> "Project":
+        toml_file_path = Path(pyproject_toml)
+        if not toml_file_path.is_absolute():
+            toml_file_path = Path.cwd() / toml_file_path
+        toml_content = toml_file_path.read_text()
+        toml_data = tomli.loads(toml_content)
+        name = toml_data["tool"]["poetry"]["name"]
+        version = toml_data["tool"]["poetry"]["version"]
+        toml_dependencies: dict = toml_data["tool"]["poetry"]["dependencies"]
+
+        requirements = [
+            f'"{package}{version}"'
+            for package, version in constrain(toml_dependencies).items()
+        ]
+
+        return cls(
+            path=toml_file_path.parent,
+            name=name,
+            version=version,
+            input_dir=input_dir,
+            main_file=main_file,
+            requirements=requirements,
+        )
+
     def build(
         self,
         *,
@@ -115,7 +147,7 @@ class Project:
         # TODO ignore_input: Iterable[str] = (),
         show_console: bool = False,
         exe_file_name: str = None,
-        icon_file: Union[str, Path, None] = None,
+        icon_file: Optional[Union[str, Path]] = None,
         # TODO: download_dir: Union[str, Path] = None,
     ) -> None:
         """TODO
@@ -128,7 +160,9 @@ class Project:
             pydist_dir (str, optional): Subdirectory where to place Python embedde interpreter. Defaults to `"pydist"`.
             source_dir (str, optional): Subdirectory where to place source code. If `None` then `app_nam` attribute will be used. Defaults to `None`.
             show_console (bool, optional): Show console window or not. Defaults to `False`.
-            exe_name (str, optional): Name of `.exe` file. If `None` then name will be the same as `main_file`. Defaults to `None`.
+            exe_name (str, optional): Name of `.exe` file.
+                If `None` then name will be the same as `main_file`.
+                Defaults to `None`.
             icon_file (Union[str, Path, None], optional): Path to icon file. Defaults to `None`.
 
         Raises:
@@ -202,7 +236,10 @@ class Project:
         )
 
     def make_dist(
-        self, *, file_name: str = None, delete_build_dir: bool = False
+        self,
+        *,
+        file_name: Optional[str] = None,
+        delete_build_dir: bool = False,
     ) -> Path:
         if file_name is None:
             file_name = self.full_name
@@ -468,9 +505,6 @@ class Project:
                 raise RuntimeError("Error installing `pip` with `get-pip.py`")
 
     def _install_requirements(self, extra_pip_install_args: Iterable):
-        """
-        Install modules
-        """
         if isinstance(self._requirements, (str, Path)):
             # load from `requirements.txt`
             requirements_txt_path = Path(self._requirements)
