@@ -6,10 +6,14 @@ import sys
 import zipfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterable, Union
+from typing import Iterable, Optional, Union
 
 import requests
+import tomli
 from genexe.generate_exe import generate_exe
+from txtoml.txtoml import constrain
+
+from .exceptions import InputDirError, InvalidPythonVersion, MainFileError
 
 __all__ = ["Project"]
 
@@ -32,50 +36,119 @@ _DEFAULT_IGNORE_PATTERNS = [
 
 
 @contextmanager
-def _log(message):
+def _log(message: str, exit_message: str = "Done.") -> None:
     print(message)
     yield
-    print("Done.\n")
+    if exit_message:
+        print(exit_message, end="\n\n")
 
 
 class Project:
     def __init__(
-        self, input_dir: str, main_file: str, app_name: str = None
+        self,
+        *,
+        path: Union[str, Path] = None,
+        name: str = None,
+        version: str = None,
+        input_dir: str = None,
+        main_file: str = None,
+        requirements: Union[Iterable[str], str, Path] = "requirements.txt",
     ) -> None:
         """TODO
 
         Args:
+            name (str, optional): App's name. If `None` then project's folder name will be used. Defaults to `None`.
+            version (str, optional): App's version. Defaults to `None`.
             input_dir (str): Directory where your source files are.
             main_file (str): Path to entry point, e.g. `main.py`
-            app_name (str, optional): App's name. If `None` then project's directory name will be used. Defaults to `None`.
         """  # noqa
-        self._path = Path().cwd()
-        self._input_path = self._path / input_dir
-        self._main_file = main_file
-        self._app_name = app_name if app_name is not None else self._path.name
 
-        (self._path / "build").mkdir(exist_ok=True)
+        if path is not None:
+            self._path = Path(path).resolve().absolute()
+        else:
+            self._path = Path().cwd().absolute()
+
+        # make folders for build and dist
+        self._build_subdir_path = Path.cwd() / "build"
+        self._build_subdir_path.mkdir(exist_ok=True)
+        self._dist_subdir_path = Path.cwd() / "dist"
+        self._dist_subdir_path.mkdir(exist_ok=True)
+
+        self._name = name
+        self._version = version
+
+        if input_dir is None:
+            self._input_path = self._discover_input_dir()
+        else:
+            self._input_path = self._path / input_dir
+            if not self._input_path.is_dir():
+                raise InputDirError(
+                    f"Specified input dir `{input_dir}` does not exists"
+                )
+
+        if main_file is None:
+            self._main_file_path = self._discover_main_file()
+            self._main_file_name = self._main_file_path.name
+        else:
+            self._main_file_path = self.input_path / main_file
+            if not self._main_file_path.is_file():
+                raise MainFileError(
+                    f"Specified main file `{main_file}` "
+                    + f"is not found in `{self.input_path}`"
+                )
+            self._main_file_name = main_file
+
+        self._requirements = requirements
+
         self._build_path: Path = None
         self._source_path: Path = None
         self._exe_path: Path = None
         self._pydist_path: Path = None
         self._requirements_path: Path = None
-
-        (self._path / "dist").mkdir(exist_ok=True)
         self._dist_path: Path = None
+
+    @classmethod
+    def from_pyproject(
+        cls,
+        pyproject_toml: Union[str, Path] = "pyproject.toml",
+        input_dir: Optional[str] = None,
+        main_file: Optional[str] = None,
+    ) -> "Project":
+        toml_file_path = Path(pyproject_toml)
+        if not toml_file_path.is_absolute():
+            toml_file_path = Path.cwd() / toml_file_path
+        toml_content = toml_file_path.read_text()
+        toml_data = tomli.loads(toml_content)
+        name = toml_data["tool"]["poetry"]["name"]
+        version = toml_data["tool"]["poetry"]["version"]
+        toml_dependencies: dict = toml_data["tool"]["poetry"]["dependencies"]
+
+        requirements = [
+            f'"{package}{version}"'
+            for package, version in constrain(toml_dependencies).items()
+        ]
+
+        return cls(
+            path=toml_file_path.parent,
+            name=name,
+            version=version,
+            input_dir=input_dir,
+            main_file=main_file,
+            requirements=requirements,
+        )
 
     def build(
         self,
+        *,
         python_version: str,
         pydist_dir: str = "pydist",
-        requirements_file: str = "requirements.txt",
         extra_pip_install_args: Iterable[str] = (),
         build_dir: str = None,
         source_dir: str = None,
         # TODO ignore_input: Iterable[str] = (),
         show_console: bool = False,
-        exe_name: str = None,
-        icon_file: Union[str, Path, None] = None,
+        exe_file_name: str = None,
+        icon_file: Optional[Union[str, Path]] = None,
         # TODO: download_dir: Union[str, Path] = None,
     ) -> None:
         """TODO
@@ -88,32 +161,34 @@ class Project:
             pydist_dir (str, optional): Subdirectory where to place Python embedde interpreter. Defaults to `"pydist"`.
             source_dir (str, optional): Subdirectory where to place source code. If `None` then `app_nam` attribute will be used. Defaults to `None`.
             show_console (bool, optional): Show console window or not. Defaults to `False`.
-            exe_name (str, optional): Name of `.exe` file. If `None` then name will be the same as `main_file`. Defaults to `None`.
+            exe_name (str, optional): Name of `.exe` file.
+                If `None` then name will be the same as `main_file`.
+                Defaults to `None`.
             icon_file (Union[str, Path, None], optional): Path to icon file. Defaults to `None`.
 
         Raises:
-            ValueError: If wrong Python version provided.
+            InvalidPythonVersion: If incorrect Python version provided.
         """  # noqa
 
         if not self._is_correct_version(python_version):
-            raise ValueError(
+            raise InvalidPythonVersion(
                 f"Specified python version `{python_version}` "
                 "does not have the correct format, it should be of format: "
                 "`x.x.x` where `x` is a positive number."
             )
 
-        self._requirements_path = self._path / requirements_file
         if build_dir is not None:
-            self._build_path = self._path / "build" / build_dir
+            self._build_path = self._build_subdir_path / build_dir
         else:
-            self._build_path = self._path / "build" / self._app_name
+            self._build_path = self._build_subdir_path / self.full_name
 
         self._pydist_path = self._build_path / pydist_dir
+        self._scripts_dir_path = self.pydist_path / "Scripts"
 
         if source_dir is not None:
             self._source_path = self._build_path / source_dir
         else:
-            self._source_path = self._build_path / self._app_name
+            self._source_path = self._build_path / self.name
 
         self._make_empty_build_dir()
         self._copy_source_files()
@@ -139,36 +214,46 @@ class Project:
 
         self._install_pip()
         self._install_requirements(
-            requirements_file_path=self._requirements_path,
-            extra_pip_install_args=list(extra_pip_install_args),
+            extra_pip_install_args=extra_pip_install_args
         )
 
+        # make exe
+        if exe_file_name is None:
+            exe_file_name = self.name
+        else:
+            if exe_file_name.lower().endswith(".exe"):
+                # other_name.exe -> other_name
+                exe_file_name = exe_file_name.lower().rstrip(".exe")
         icon_file_path = Path(icon_file) if icon_file is not None else None
         self._make_startup_exe(
-            show_console=show_console, icon_file_path=icon_file_path
+            show_console=show_console,
+            exe_file_name=exe_file_name,
+            icon_file_path=icon_file_path,
         )
 
-        if exe_name is not None:
-            self._rename_exe_file(new_file_name=exe_name)
-
-        print(
+        _log(
             f"\nBuild done! Folder `{self._build_path}` "
-            "contains your runnable application!\n"
+            "contains your runnable application!\n",
+            exit_message=None
         )
 
     def make_dist(
-        self, file_name: str = None, delete_build_dir: bool = False
+        self,
+        *,
+        file_name: Optional[str] = None,
+        delete_build_dir: bool = False,
     ) -> Path:
         if file_name is None:
-            file_name = self._app_name
-        zip_file_path = self._path / "dist" / file_name
-        builds_dir = self.path / "build"
+            file_name = self.full_name
+        zip_file_path = self._dist_subdir_path / file_name
         with _log(f"Making zip archive {zip_file_path}"):
             shutil.make_archive(
                 base_name=str(zip_file_path),
                 format="zip",
-                root_dir=str(builds_dir),
-                base_dir=str(self.build_path.relative_to(builds_dir)),
+                root_dir=str(self._build_subdir_path),
+                base_dir=str(
+                    self.build_path.relative_to(self._build_subdir_path)
+                ),
             )
         self._dist_path = zip_file_path
 
@@ -182,12 +267,21 @@ class Project:
         return self._path
 
     @property
-    def input_path(self) -> None:
-        return self._input_path
+    def name(self) -> str:
+        return self._name if self._name else self.path.name
 
     @property
-    def app_name(self) -> str:
-        return self._app_name
+    def version(self) -> str:
+        return self._version if self._version else ""
+
+    @property
+    def full_name(self) -> str:
+        """<name>-<version>"""
+        return self.name + (f"-{self.version}" if self.version else "")
+
+    @property
+    def input_path(self) -> Path:
+        return self._input_path
 
     @property
     def build_path(self) -> Path:
@@ -213,6 +307,40 @@ class Project:
     def dist_path(self) -> Path:
         return self._dist_path
 
+    def _discover_input_dir(self) -> Path:
+        with _log(f"Input dir not specified.\nDiscovering in `{self.path}`"):
+            names = [
+                f"{self.name}",
+                f"{self.name.replace('-', '_')}",
+                f"{self.name.replace('-', '')}",
+                "src",
+                "source",
+                "sources",
+            ]
+            for name in names:
+                print(f"Tring `{name}`...")
+                input_path = self.path / name
+                if input_path.is_dir():
+                    return input_path
+            raise InputDirError  # TODO: message
+
+    def _discover_main_file(self) -> Path:
+        with _log(
+            f"Main file not specified.\nDiscovering in `{self.input_path}`"
+        ):
+            names = [
+                f"{self.name}.py",
+                f"{self.name.replace('-', '_')}.py",
+                f"{self.name.replace('-', '')}.py",
+                "main.py",
+            ]
+            for name in names:
+                print(f"Tring `{name}`...")
+                main_file_path = self.input_path / name
+                if main_file_path.is_file():
+                    return main_file_path
+            raise MainFileError  # TODO: message
+
     @staticmethod
     def _is_correct_version(python_version) -> bool:
         return re.match(_PYTHON_VERSION_REGEX, python_version)
@@ -225,7 +353,7 @@ class Project:
     def _execute_os_command(command: str, cwd: str = None) -> str:
         """Execute terminal command"""
 
-        with _log(f"Running command: {command}"):
+        with _log(f"Running command: {command}", exit_message=None):
             process = subprocess.Popen(
                 command,
                 shell=True,
@@ -246,7 +374,6 @@ class Project:
             exit_code = process.returncode
 
             if exit_code == 0:
-                print(output)
                 return output
             else:
                 raise Exception(command, exit_code, output)
@@ -373,78 +500,77 @@ class Project:
         with _log("Installing `pip`"):
             Project._execute_os_command(
                 command="python.exe get-pip.py --no-warn-script-location",
-                cwd=str(self._pydist_path),
+                cwd=str(self.pydist_path),
             )
-            if not (self._pydist_path / "Scripts").exists():
-                raise RuntimeError("Can not install `pip` with `get-pip.py`!")
+            if not self._scripts_dir_path.exists():
+                raise RuntimeError("Error installing `pip` with `get-pip.py`")
 
-    def _install_requirements(
-        self,
-        requirements_file_path: Path,
-        extra_pip_install_args: list[str],
-    ):
-        """
-        Install the modules from requirements.txt file
-        - extra_pip_install_args (optional `List[str]`) :
-        pass these additional arguments to the pip install command
-        """
+    def _install_requirements(self, extra_pip_install_args: Iterable):
+        if isinstance(self._requirements, (str, Path)):
+            # load from `requirements.txt`
+            requirements_txt_path = Path(self._requirements)
+            if not requirements_txt_path.is_absolute():
+                requirements_txt_path = self.path / requirements_txt_path
+            modules = requirements_txt_path.read_text().splitlines()
+        else:  # is Iterable
+            modules = self._requirements
 
-        with _log("Installing requirements"):
-            scripts_dir_path = self._pydist_path / "Scripts"
+        if extra_pip_install_args:
+            extra_pip_install_args_str = " " + " ".join(extra_pip_install_args)
+        else:
+            extra_pip_install_args_str = ""
 
-            if extra_pip_install_args:
-                extra_args_str = " " + " ".join(extra_pip_install_args)
-            else:
-                extra_args_str = ""
-
-            try:
+        for module in modules:
+            with _log(f"Installing {module}:"):
                 cmd = (
-                    "pip3.exe install "
-                    + "--no-cache-dir --no-warn-script-location "
-                    + f"-r {str(requirements_file_path)}{extra_args_str}"
+                    "pip3.exe install --no-cache-dir "
+                    + "--no-warn-script-location "
+                    + f"{module}{extra_pip_install_args_str}"
                 )
-                Project._execute_os_command(
-                    command=cmd, cwd=str(scripts_dir_path)
-                )
-                return
-            except Exception:
-                print("Installing modules one by one")
-                modules = requirements_file_path.read_text().splitlines()
-                for module in modules:
-                    try:
-                        print(f"Installing {module} ...", end="", flush=True)
-                        cmd = "pip3.exe install --no-cache-dir "
-                        f"--no-warn-script-location {module}{extra_args_str}"
-                        Project._execute_os_command(
-                            command=cmd, cwd=str(scripts_dir_path)
-                        )
-                        print("done")
-                    except Exception:
-                        print("FAILED TO INSTALL ", module)
-                        with (
-                            self._build_path / "FAILED_TO_INSTALL_MODULES.txt"
-                        ).open(mode="a") as f:
-                            f.write(module + "\n")
-                    print("\n")
+                try:
+                    Project._execute_os_command(
+                        command=cmd, cwd=str(self._scripts_dir_path)
+                    )
+                except Exception:
+                    print("FAILED TO INSTALL ", module)
+                    with (
+                        self.build_path / "FAILED_TO_INSTALL_MODULES.txt"
+                    ).open(mode="a") as f:
+                        f.write(module + "\n")
 
     def _make_startup_exe(
         self,
         show_console: bool,
+        exe_file_name: str,
         icon_file_path: Union[Path, None],
     ) -> Path:
         """Make the startup exe file needed to run the script"""
 
-        relative_pydist_dir = self._pydist_path.relative_to(self._build_path)
-        relative_source_dir = self._source_path.relative_to(self._build_path)
-        exe_file_path = self._build_path / Path(self._main_file).with_suffix(
-            ".exe"
-        )
+        if not show_console:
+            main_file_copy_path = self._source_path / self._main_file_name
+            with _log(f"No console. Patching `{main_file_copy_path}`"):
+                main_file_content = main_file_copy_path.read_text(
+                    encoding="utf8", errors="surrogateescape"
+                )
+                if _HEADER_NO_CONSOLE not in main_file_content:
+                    main_file_copy_path.write_text(
+                        str(_HEADER_NO_CONSOLE + main_file_content),
+                        encoding="utf8",
+                        errors="surrogateescape",
+                    )
+
+        relative_pydist_dir = self.pydist_path.relative_to(self.build_path)
+        relative_source_dir = self.source_path.relative_to(self.build_path)
+        exe_file_path = self.build_path / f"{exe_file_name}.exe"
         python_entrypoint = "python.exe"
         command_str = (
             f"{{EXE_DIR}}\\{relative_pydist_dir}\\{python_entrypoint} "
-            + f"{{EXE_DIR}}\\{relative_source_dir}\\{self._main_file}"
+            + f"{{EXE_DIR}}\\{relative_source_dir}\\{self._main_file_name}"
         )
-        with _log(f"Making startup exe file `{exe_file_path}`"):
+
+        with _log(
+            f"Making startup exe file `{exe_file_path}`", exit_message=None
+        ):
             generate_exe(
                 target=exe_file_path,
                 command=command_str,
@@ -452,28 +578,8 @@ class Project:
                 show_console=show_console,
             )
 
-            if not show_console:
-                main_file_path = self._source_path / self._main_file
-                main_file_content = main_file_path.read_text(
-                    encoding="utf8", errors="surrogateescape"
-                )
-                if _HEADER_NO_CONSOLE not in main_file_content:
-                    main_file_path.write_text(
-                        str(_HEADER_NO_CONSOLE + main_file_content),
-                        encoding="utf8",
-                        errors="surrogateescape",
-                    )
-
             self._exe_path = exe_file_path
             return exe_file_path
-
-    def _rename_exe_file(self, new_file_name: str) -> Path:
-        if new_file_name.lower().endswith(".exe"):  # new_name.exe -> new_name
-            new_file_name = new_file_name.lower().rstrip(".exe")
-        new_exe_path = self.exe_path.with_stem(new_file_name)
-        with _log(f"Renaming {self.exe_path} -> {new_exe_path}"):
-            self._exe_path = self._exe_path.rename(new_exe_path)
-        return self.exe_path
 
     def _delete_build_dir(self) -> None:
         with _log(f"Removing build folder {self._build_path}!"):
