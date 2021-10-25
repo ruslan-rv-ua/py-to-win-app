@@ -31,11 +31,11 @@
 			<div class="col mt-1">
 				<!-- markdownlint-disable -->
 
-<p><a href="..\py_to_win_app\py_to_win_app.py#L43"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<p><a href="..\py_to_win_app\py_to_win_app.py#L45"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
 
 <h1><kbd>class</kbd> <code>Project</code></h1>
 
-<p><a href="..\py_to_win_app\py_to_win_app.py#L44"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<p><a href="..\py_to_win_app\py_to_win_app.py#L46"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
 
 <h3><kbd>method</kbd> <code>Project.__init__</code></h3>
 
@@ -108,7 +108,7 @@
 
 <hr />
 
-<p><a href="..\py_to_win_app\py_to_win_app.py#L107"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<p><a href="..\py_to_win_app\py_to_win_app.py#L139"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
 
 <h2><kbd>method</kbd> <code>Project.build</code></h2>
 
@@ -136,7 +136,7 @@
 <li><b><code>pydist_dir</code></b> (str, optional):  Subdirectory where to place Python embedde interpreter. Defaults to <code>"pydist"</code>. </li>
 <li><b><code>source_dir</code></b> (str, optional):  Subdirectory where to place source code. If <code>None</code> then <code>app_nam</code> attribute will be used. Defaults to <code>None</code>. </li>
 <li><b><code>show_console</code></b> (bool, optional):  Show console window or not. Defaults to <code>False</code>. </li>
-<li><b><code>exe_name</code></b> (str, optional):  Name of <code>.exe</code> file. If <code>None</code> then name will be the same as <code>main_file</code>. Defaults to <code>None</code>. </li>
+<li><b><code>exe_name</code></b> (str, optional):  Name of <code>.exe</code> file.  If <code>None</code> then name will be the same as <code>main_file</code>.  Defaults to <code>None</code>. </li>
 <li><b><code>icon_file</code></b> (Union[str, Path, None], optional):  Path to icon file. Defaults to <code>None</code>. </li>
 </ul>
 
@@ -148,11 +148,27 @@
 
 <hr />
 
-<p><a href="..\py_to_win_app\py_to_win_app.py#L204"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+<p><a href="..\py_to_win_app\py_to_win_app.py#L109"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
+
+<h2><kbd>classmethod</kbd> <code>Project.from_pyproject</code></h2>
+
+<pre><code>from_pyproject(
+    pyproject_toml: Union[str, pathlib.Path] = 'pyproject.toml',
+    input_dir: Optional[str] = None,
+    main_file: Optional[str] = None
+) → Project
+</code></pre>
+
+<hr />
+
+<p><a href="..\py_to_win_app\py_to_win_app.py#L238"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a></p>
 
 <h2><kbd>method</kbd> <code>Project.make_dist</code></h2>
 
-<pre><code>make_dist(file_name: str = None, delete_build_dir: bool = False) → Path
+<pre><code>make_dist(
+    file_name: Optional[str] = None,
+    delete_build_dir: bool = False
+) → Path
 </code></pre>
 
 <hr />
