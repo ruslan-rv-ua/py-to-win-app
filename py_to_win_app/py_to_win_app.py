@@ -36,10 +36,11 @@ _DEFAULT_IGNORE_PATTERNS = [
 
 
 @contextmanager
-def _log(message: str, exit_message: str = "Done") -> None:
+def _log(message: str, exit_message: str = "Done.") -> None:
     print(message)
     yield
-    print(exit_message, end="\n\n")
+    if exit_message:
+        print(exit_message, end="\n\n")
 
 
 class Project:
@@ -230,9 +231,10 @@ class Project:
             icon_file_path=icon_file_path,
         )
 
-        print(
+        _log(
             f"\nBuild done! Folder `{self._build_path}` "
-            "contains your runnable application!\n"
+            "contains your runnable application!\n",
+            exit_message=None
         )
 
     def make_dist(
@@ -351,7 +353,7 @@ class Project:
     def _execute_os_command(command: str, cwd: str = None) -> str:
         """Execute terminal command"""
 
-        with _log(f"Running command: {command}"):
+        with _log(f"Running command: {command}", exit_message=None):
             process = subprocess.Popen(
                 command,
                 shell=True,
@@ -372,7 +374,6 @@ class Project:
             exit_code = process.returncode
 
             if exit_code == 0:
-                print(output)
                 return output
             else:
                 raise Exception(command, exit_code, output)
@@ -567,7 +568,9 @@ class Project:
             + f"{{EXE_DIR}}\\{relative_source_dir}\\{self._main_file_name}"
         )
 
-        with _log(f"Making startup exe file `{exe_file_path}`"):
+        with _log(
+            f"Making startup exe file `{exe_file_path}`", exit_message=None
+        ):
             generate_exe(
                 target=exe_file_path,
                 command=command_str,
