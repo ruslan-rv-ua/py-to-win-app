@@ -13,7 +13,6 @@ import tomli
 from genexe.generate_exe import generate_exe
 from txtoml.txtoml import constrain
 
-from .exceptions import InputDirError, InvalidPythonVersion, MainFileError
 
 __all__ = ["Project"]
 
@@ -82,8 +81,8 @@ class Project:
         else:
             self._input_path = self._path / input_dir
             if not self._input_path.is_dir():
-                raise InputDirError(
-                    f"Specified input dir `{input_dir}` does not exists"
+                raise FileNotFoundError(
+                    f"Input dir does not exists: `{input_dir}`"
                 )
 
         if main_file is None:
@@ -92,9 +91,8 @@ class Project:
         else:
             self._main_file_path = self.input_path / main_file
             if not self._main_file_path.is_file():
-                raise MainFileError(
-                    f"Specified main file `{main_file}` "
-                    + f"is not found in `{self.input_path}`"
+                raise FileNotFoundError(
+                    f"Main file does not exists: `{self._main_file_path}` "
                 )
             self._main_file_name = main_file
 
@@ -171,10 +169,10 @@ class Project:
         """  # noqa
 
         if not self._is_correct_version(python_version):
-            raise InvalidPythonVersion(
+            raise ValueError(
                 f"Specified python version `{python_version}` "
-                "does not have the correct format, it should be of format: "
-                "`x.x.x` where `x` is a positive number."
+                + "does not have the correct format, it should be of format: "
+                + "`x.x.x` where `x` is a positive number."
             )
 
         if build_dir is not None:
@@ -234,7 +232,7 @@ class Project:
         _log(
             f"\nBuild done! Folder `{self._build_path}` "
             "contains your runnable application!\n",
-            exit_message=None
+            exit_message=None,
         )
 
     def make_dist(
@@ -322,7 +320,6 @@ class Project:
                 input_path = self.path / name
                 if input_path.is_dir():
                     return input_path
-            raise InputDirError  # TODO: message
 
     def _discover_main_file(self) -> Path:
         with _log(
@@ -339,7 +336,6 @@ class Project:
                 main_file_path = self.input_path / name
                 if main_file_path.is_file():
                     return main_file_path
-            raise MainFileError  # TODO: message
 
     @staticmethod
     def _is_correct_version(python_version) -> bool:
