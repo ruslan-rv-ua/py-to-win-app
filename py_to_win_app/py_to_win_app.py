@@ -47,12 +47,13 @@ class Project:
     def __init__(
         self,
         *,
-        path: Union[str, Path] = None,
-        name: str = None,
-        version: str = None,
-        input_dir: str = None,
-        main_file: str = None,
+        path: Union[str, Path] = "",
+        name: str = "",
+        version: str = "",
+        input_dir: str = "",
+        main_file: str = "",
         requirements: Union[Iterable[str], str, Path] = "requirements.txt",
+        extra_pip_install_args: Iterable[str] = (),
     ) -> None:
         """TODO
 
@@ -63,10 +64,7 @@ class Project:
             main_file (str): Path to entry point, e.g. `main.py`
         """  # noqa
 
-        if path is not None:
-            self._path = Path(path).resolve().absolute()
-        else:
-            self._path = Path().cwd().absolute()
+        self._path = Project._make_absolute_path(path)
 
         # make folders for build and dist
         self._build_subdir_path = Path.cwd() / "build"
@@ -77,42 +75,48 @@ class Project:
         self._name = name
         self._version = version
 
-        if input_dir is None:
-            self._input_path = self._discover_input_dir()
-        else:
-            self._input_path = self._path / input_dir
-            if not self._input_path.is_dir():
-                raise InputDirError(
-                    f"Specified input dir `{input_dir}` does not exists"
-                )
+        self._input_path = Project._make_absolute_path(
+            input_dir,
+            default_path=self._discover_input_dir(self.path),
+            base_path=self.path,
+        )
+        if not self._input_path.exists():
+            raise InputDirError(
+                f"Specified input dir `{input_dir}` does not exists"
+            )
+        print(f"Input dir: {self.input_path}")
 
-        if main_file is None:
-            self._main_file_path = self._discover_main_file()
-            self._main_file_name = self._main_file_path.name
-        else:
-            self._main_file_path = self.input_path / main_file
-            if not self._main_file_path.is_file():
-                raise MainFileError(
-                    f"Specified main file `{main_file}` "
-                    + f"is not found in `{self.input_path}`"
-                )
-            self._main_file_name = main_file
+        self._main_file_path = Project._make_absolute_path(
+            main_file,
+            default_path=self._discover_main_file(self.input_path),
+            base_path=self.input_path,
+        )
+        if not (
+            self._main_file_path.is_file() and self._main_file_path.exists()
+        ):
+            raise MainFileError(
+                f"Specified main file `{main_file}` "
+                + f"is not found in `{self.input_path}`"
+            )
+        print(f"Main file: {self._main_file_path}")
+        self._main_file_name = self._main_file_path.name
 
         self._requirements = requirements
+        self._extra_pip_install_args = extra_pip_install_args
 
         self._build_path: Path = None
         self._source_path: Path = None
         self._exe_path: Path = None
         self._pydist_path: Path = None
-        self._requirements_path: Path = None
         self._dist_path: Path = None
 
     @classmethod
     def from_pyproject(
         cls,
         pyproject_toml: Union[str, Path] = "pyproject.toml",
-        input_dir: Optional[str] = None,
-        main_file: Optional[str] = None,
+        input_dir: str = "",
+        main_file: str = "",
+        extra_pip_install_args: Iterable[str] = (),
     ) -> "Project":
         toml_file_path = Path(pyproject_toml)
         if not toml_file_path.is_absolute():
@@ -135,16 +139,16 @@ class Project:
             input_dir=input_dir,
             main_file=main_file,
             requirements=requirements,
+            extra_pip_install_args=extra_pip_install_args,
         )
 
     def build(
         self,
         *,
         python_version: str,
-        pydist_dir: str = "pydist",
-        extra_pip_install_args: Iterable[str] = (),
-        build_dir: str = None,
-        source_dir: str = None,
+        build_path: Union[str, Path] = "",
+        source_dir: str = "",
+        pydist_dir: str = "",
         # TODO ignore_input: Iterable[str] = (),
         show_console: bool = False,
         exe_file_name: str = None,
@@ -177,19 +181,20 @@ class Project:
                 "`x.x.x` where `x` is a positive number."
             )
 
-        if build_dir is not None:
-            self._build_path = self._build_subdir_path / build_dir
-        else:
-            self._build_path = self._build_subdir_path / self.full_name
+        self._build_path = Project._make_absolute_path(
+            build_path,
+            default_path=self.full_name,
+            base_path=self._build_subdir_path,
+        )
+        self._pydist_path = Project._make_absolute_path(
+            pydist_dir, default_path="pydist", base_path=self.build_path
+        )
+        self._scripts_path = self.pydist_path / "Scripts"
+        self._source_path = Project._make_absolute_path(
+            source_dir, default_path=self.name, base_path=self.build_path
+        )
 
-        self._pydist_path = self._build_path / pydist_dir
-        self._scripts_dir_path = self.pydist_path / "Scripts"
-
-        if source_dir is not None:
-            self._source_path = self._build_path / source_dir
-        else:
-            self._source_path = self._build_path / self.name
-
+        # do the magic!
         self._make_empty_build_dir()
         self._copy_source_files()
 
@@ -210,11 +215,11 @@ class Project:
             shutil.copy2(getpippy_file_path, self._pydist_path)
 
         self._patch_pth_file(python_version=python_version)
-        # self._extract_pythonzip(python_version=python_version)
+        self._extract_pythonzip(python_version=python_version)
 
         self._install_pip()
         self._install_requirements(
-            extra_pip_install_args=extra_pip_install_args
+            extra_pip_install_args=self._extra_pip_install_args
         )
 
         # make exe
@@ -234,7 +239,7 @@ class Project:
         _log(
             f"\nBuild done! Folder `{self._build_path}` "
             "contains your runnable application!\n",
-            exit_message=None
+            exit_message=None,
         )
 
     def make_dist(
@@ -272,7 +277,7 @@ class Project:
 
     @property
     def version(self) -> str:
-        return self._version if self._version else ""
+        return self._version
 
     @property
     def full_name(self) -> str:
@@ -300,15 +305,22 @@ class Project:
         return self._pydist_path
 
     @property
-    def requirements_path(self) -> Path:
-        return self._requirements_path
-
-    @property
     def dist_path(self) -> Path:
         return self._dist_path
 
-    def _discover_input_dir(self) -> Path:
-        with _log(f"Input dir not specified.\nDiscovering in `{self.path}`"):
+    @staticmethod
+    def _make_absolute_path(
+        path: Union[str, Path] = "",
+        default_path: Union[str, Path] = "",
+        base_path: Union[str, Path] = Path().cwd(),
+    ) -> Path:
+        path = Path(path or default_path)
+        if path.is_absolute():
+            return path
+        return Path(base_path).absolute().resolve() / path
+
+    def _discover_input_dir(self, path: Path) -> str:
+        with _log(f"Input dir not specified.\nDiscovering in `{path}`"):
             names = [
                 f"{self.name}",
                 f"{self.name.replace('-', '_')}",
@@ -318,28 +330,28 @@ class Project:
                 "sources",
             ]
             for name in names:
-                print(f"Tring `{name}`...")
-                input_path = self.path / name
-                if input_path.is_dir():
-                    return input_path
-            raise InputDirError  # TODO: message
+                input_path = path / name
+                print(f"Trying `{input_path}`...")
+                if input_path.exists():
+                    return name
+            print("Nothing discovered.")
+            return ""
 
-    def _discover_main_file(self) -> Path:
-        with _log(
-            f"Main file not specified.\nDiscovering in `{self.input_path}`"
-        ):
-            names = [
+    def _discover_main_file(self, path: Path) -> str:
+        with _log(f"Main file not specified.\nDiscovering in `{path}`"):
+            names = (
                 f"{self.name}.py",
                 f"{self.name.replace('-', '_')}.py",
                 f"{self.name.replace('-', '')}.py",
                 "main.py",
-            ]
+            )
             for name in names:
-                print(f"Tring `{name}`...")
-                main_file_path = self.input_path / name
+                main_file_path = path / name
+                print(f"Trying `{main_file_path}`...")
                 if main_file_path.is_file():
-                    return main_file_path
-            raise MainFileError  # TODO: message
+                    return name
+            print("Nothing discovered.")
+            return ""
 
     @staticmethod
     def _is_correct_version(python_version) -> bool:
@@ -502,7 +514,7 @@ class Project:
                 command="python.exe get-pip.py --no-warn-script-location",
                 cwd=str(self.pydist_path),
             )
-            if not self._scripts_dir_path.exists():
+            if not self._scripts_path.exists():
                 raise RuntimeError("Error installing `pip` with `get-pip.py`")
 
     def _install_requirements(self, extra_pip_install_args: Iterable):
@@ -529,7 +541,7 @@ class Project:
                 )
                 try:
                     Project._execute_os_command(
-                        command=cmd, cwd=str(self._scripts_dir_path)
+                        command=cmd, cwd=str(self._scripts_path)
                     )
                 except Exception:
                     print("FAILED TO INSTALL ", module)
@@ -542,7 +554,7 @@ class Project:
         self,
         show_console: bool,
         exe_file_name: str,
-        icon_file_path: Union[Path, None],
+        icon_file_path: Optional[Path] = None,
     ) -> Path:
         """Make the startup exe file needed to run the script"""
 
