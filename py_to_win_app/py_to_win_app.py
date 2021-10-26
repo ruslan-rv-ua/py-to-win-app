@@ -13,7 +13,6 @@ import tomli
 from genexe.generate_exe import generate_exe
 from txtoml.txtoml import constrain
 
-from .exceptions import InputDirError, InvalidPythonVersion, MainFileError
 
 __all__ = ["Project"]
 
@@ -81,8 +80,8 @@ class Project:
             base_path=self.path,
         )
         if not self._input_path.exists():
-            raise InputDirError(
-                f"Specified input dir `{input_dir}` does not exists"
+            raise FileNotFoundError(
+                f"Input dir  does not exists: `{self.input_path}`"
             )
         print(f"Input dir: {self.input_path}")
 
@@ -94,9 +93,8 @@ class Project:
         if not (
             self._main_file_path.is_file() and self._main_file_path.exists()
         ):
-            raise MainFileError(
-                f"Specified main file `{main_file}` "
-                + f"is not found in `{self.input_path}`"
+            raise FileNotFoundError(
+                f"Main file does not exists: `{self._main_file_path}` "
             )
         print(f"Main file: {self._main_file_path}")
         self._main_file_name = self._main_file_path.name
@@ -175,10 +173,10 @@ class Project:
         """  # noqa
 
         if not self._is_correct_version(python_version):
-            raise InvalidPythonVersion(
+            raise ValueError(
                 f"Specified python version `{python_version}` "
-                "does not have the correct format, it should be of format: "
-                "`x.x.x` where `x` is a positive number."
+                + "does not have the correct format, it should be of format: "
+                + "`x.x.x` where `x` is a positive number."
             )
 
         self._build_path = Project._make_absolute_path(
