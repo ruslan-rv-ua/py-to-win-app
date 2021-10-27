@@ -3,5 +3,14 @@
     "python.linting.enabled": true,
 	"python.formatting.blackArgs": [
         "--line-length=79"
-    ]
+    ],
+    "conventionalCommits.scopes": [
+        "make_dist",
+        "examples"
+    ],
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }

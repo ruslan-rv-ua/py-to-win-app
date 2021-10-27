@@ -4,17 +4,17 @@
 
 TODO: description
 
+## Installation
+
+Install as dev dependency:
+
+    poetry add --dev py-to-win-app
+
+Or using pip:
+
+    pip install py-to-win-app
+
 ## Usage
-
-In the root directory of your project:
-
-1. Install:
-
-    `pip install py-to-win-app`
-
-    Using `poetry`:
-
-    `poetry add --dev py-to-win-app`
 
 1. Make `requirements.txt` file:
 
@@ -24,13 +24,13 @@ In the root directory of your project:
 
     `poetry export -f requirements.txt -o requirements.txt --without-hashes`
 
-1. Create fiel `build.py` with following content:
+1. In root directory of your project create file `build.py` with following content:
 
     ```python
     from py_to_win_app import Project
 
     project = Project(
-        input_dir="my-project",  # directory where your source files are
+        input_dir="my_project",  # directory where your source files are
         main_file="main.py"
     )
 
@@ -44,7 +44,7 @@ In the root directory of your project:
 
 ## Documentation
 
-- [API documentation](http://ruslan.rv.ua/py-to-win-app/)
+- [API documentation](https://github.com/ruslan-rv-ua/py-to-win-app/blob/markdown-docs/docs/py_to_win_app.md)
 
 ## Examples
 
@@ -61,7 +61,7 @@ In the root directory of your project:
     You can find runnable windows application in `build/flask-desktop` directory.
     Distribution `flask-desktop.zip`
 
-More examples:
+#### More examples:
 
 - [telecode](https://github.com/ruslan-rv-ua/telecode) — desktop wxPython application
 
