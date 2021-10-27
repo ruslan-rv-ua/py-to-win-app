@@ -71,7 +71,7 @@ class Project:
         self._build_subdir_path.mkdir(exist_ok=True)
         self._dist_subdir_path = Path.cwd() / "dist"
         self._dist_subdir_path.mkdir(exist_ok=True)
-        self._download_subdir_path = Path.cwd() / "downloads"
+        self._download_subdir_path = Path.cwd() / 'downloads'
         self._download_subdir_path.mkdir(exist_ok=True)
 
         self._name = name
@@ -170,10 +170,6 @@ class Project:
             exe_name (str, optional): Name of `.exe` file.
                 If `None` then name will be the same as `main_file`.
                 Defaults to `None`.
-                So if there be another paragraph?
-                * item 1
-                * item 2
-                One line.
             icon_file (Union[str, Path, None], optional): Path to icon file. Defaults to `None`.
 
         Raises:
@@ -200,13 +196,11 @@ class Project:
             source_dir, default_path=self.name, base_path=self.build_path
         )
         download_path = Project._make_absolute_path(
-            download_dir,
-            default_path=self._download_subdir_path,
-            base_path=self.path,
+            download_dir, default_path=self._download_subdir_path, base_path=self.path
         )
         if not download_path.exists():
             raise FileNotFoundError(
-                f"Download directory does not exists: `{download_path}`"
+                f'Download directory does not exists: `{download_path}`'
             )
 
         ##################################################
@@ -464,7 +458,9 @@ class Project:
         self._build_path.mkdir()
 
     def _extract_pydist_file(self, pydist_file_path: Path) -> None:
-        with _log(f"Extracting `{pydist_file_path}` to `{self._pydist_path}`"):
+        with _log(
+            f"Extracting `{pydist_file_path}` to `{self._pydist_path}`"
+        ):
             self._unzip(
                 zip_file_path=pydist_file_path,
                 destination_dir_path=self._pydist_path,

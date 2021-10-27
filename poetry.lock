@@ -151,6 +151,14 @@ typer = "*"
 dev = ["setuptools", "wheel", "twine", "flake8", "pytest", "pytest-mock", "pytest-cov", "mypy", "black", "pydocstyle", "isort"]
 
 [[package]]
+name = "markdown2"
+version = "2.4.1"
+description = "A fast and complete Python implementation of Markdown"
+category = "dev"
+optional = false
+python-versions = ">=3.5, <4"
+
+[[package]]
 name = "mccabe"
 version = "0.6.1"
 description = "McCabe checker, plugin for flake8"
@@ -364,7 +372,7 @@ testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "7a5119a6f6bece5577ce71ae1760a8e03cfdc2aba1573389d28034a860796ae4"
+content-hash = "233192bcde57cbfd8df6f879f3a5cd9fa12b367cf3c82d02b388548f4d07bb0b"
 
 [metadata.files]
 "backports.entry-points-selectable" = [
@@ -418,6 +426,10 @@ idna = [
 lazydocs = [
     {file = "lazydocs-0.4.8-py3-none-any.whl", hash = "sha256:cebdce88c8e01ae19c63da77fc25a16abd6f7a7055930001644703643e608fed"},
     {file = "lazydocs-0.4.8.tar.gz", hash = "sha256:8ac1fda05f03e0c5ae1d30b81eaeb785476efa161194a5e8bfa8630e14af9562"},
+]
+markdown2 = [
+    {file = "markdown2-2.4.1-py2.py3-none-any.whl", hash = "sha256:93a29c5cad95b00d82908590548479638251c9188df449561f614d2f9756e15a"},
+    {file = "markdown2-2.4.1.tar.gz", hash = "sha256:ce9265cf179c4e07934e7b6a4b03f3edb7891e66e6d0f7017755f6064bbbe13f"},
 ]
 mccabe = [
     {file = "mccabe-0.6.1-py2.py3-none-any.whl", hash = "sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42"},
