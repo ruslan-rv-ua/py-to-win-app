@@ -203,22 +203,25 @@ class Project:
         )
         self._extract_embedded_python(embedded_file_path)
 
-        # download `get_pip.py` and copy it to build directory
+        self._patch_pth_file(python_version=python_version)
+        self._extract_pythonzip(python_version=python_version)
+
+        # Get and install `pip`. Install requirements
         getpippy_file_path = self._download_getpippy(
             download_path=download_path
         )
         with _log(
             f"Coping `{getpippy_file_path}` file to `{self._pydist_path}`"
         ):
-            shutil.copy2(getpippy_file_path, self._pydist_path)
-
-        self._patch_pth_file(python_version=python_version)
-        self._extract_pythonzip(python_version=python_version)
-
+            copied_getpippy_file_path = Path(
+                shutil.copy2(getpippy_file_path, self.pydist_path)
+            )
         self._install_pip()
         self._install_requirements(
             extra_pip_install_args=self._extra_pip_install_args
         )
+        with _log(f'Removeing `{copied_getpippy_file_path}`'):
+            copied_getpippy_file_path.unlink()
 
         # make exe
         if exe_file_name is None:
