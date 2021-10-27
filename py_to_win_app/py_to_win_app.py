@@ -3,6 +3,7 @@ import re
 import shutil
 import subprocess
 import sys
+from tkinter.tix import Tree
 import zipfile
 from contextlib import contextmanager
 from pathlib import Path
@@ -147,6 +148,7 @@ class Project:
         build_path: Union[str, Path] = "",
         source_dir: str = "",
         pydist_dir: str = "",
+        extract_pythonzip: bool = Tree,
         # TODO ignore_input: Iterable[str] = (),
         show_console: bool = False,
         exe_file_name: str = None,
@@ -204,7 +206,8 @@ class Project:
         self._extract_embedded_python(embedded_file_path)
 
         self._patch_pth_file(python_version=python_version)
-        self._extract_pythonzip(python_version=python_version)
+        if extract_pythonzip:
+            self._extract_pythonzip(python_version=python_version)
 
         # Get and install `pip`. Install requirements
         getpippy_file_path = self._download_getpippy(
