@@ -5,6 +5,4 @@ relative_links:
   enabled: true
   collections: true
 include:
-  - README.md
   - py_to_win_app.md
-  - LICENSE.md
