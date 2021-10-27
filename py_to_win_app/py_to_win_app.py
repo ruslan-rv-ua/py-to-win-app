@@ -71,6 +71,8 @@ class Project:
         self._build_subdir_path.mkdir(exist_ok=True)
         self._dist_subdir_path = Path.cwd() / "dist"
         self._dist_subdir_path.mkdir(exist_ok=True)
+        self._download_subdir_path = Path.cwd() / 'downloads'
+        self._download_subdir_path.mkdir(exist_ok=True)
 
         self._name = name
         self._version = version
@@ -148,12 +150,12 @@ class Project:
         build_path: Union[str, Path] = "",
         source_dir: str = "",
         pydist_dir: str = "",
+        download_dir: Union[str, Path] = "",
         extract_pythonzip: bool = Tree,
         # TODO ignore_input: Iterable[str] = (),
         show_console: bool = False,
         exe_file_name: str = None,
         icon_file: Optional[Union[str, Path]] = None,
-        # TODO: download_dir: Union[str, Path] = None,
     ) -> None:
         """TODO
 
@@ -193,17 +195,25 @@ class Project:
         self._source_path = Project._make_absolute_path(
             source_dir, default_path=self.name, base_path=self.build_path
         )
+        download_path = Project._make_absolute_path(
+            download_dir, default_path=self._download_subdir_path, base_path=self.path
+        )
+        if not download_path.exists():
+            raise FileNotFoundError(
+                f'Download directory does not exists: `{download_path}`'
+            )
 
+        ##################################################
         # do the magic!
+        ##################################################
         self._make_empty_build_dir()
         self._copy_source_files()
 
         # download embedded python and extract it to build directory
-        download_path = Path.home() / "Downloads"
-        embedded_file_path = self._download_python_dist(
+        pydist_file_path = self._download_python_dist(
             download_path=download_path, python_version=python_version
         )
-        self._extract_embedded_python(embedded_file_path)
+        self._extract_pydist_file(pydist_file_path)
 
         self._patch_pth_file(python_version=python_version)
         if extract_pythonzip:
@@ -223,7 +233,7 @@ class Project:
         self._install_requirements(
             extra_pip_install_args=self._extra_pip_install_args
         )
-        with _log(f'Removeing `{copied_getpippy_file_path}`'):
+        with _log(f"Removeing `{copied_getpippy_file_path}`"):
             copied_getpippy_file_path.unlink()
 
         # make exe
@@ -447,12 +457,12 @@ class Project:
                 shutil.rmtree(self._build_path)
         self._build_path.mkdir()
 
-    def _extract_embedded_python(self, embedded_file_path: Path) -> None:
+    def _extract_pydist_file(self, pydist_file_path: Path) -> None:
         with _log(
-            f"Extracting `{embedded_file_path}` to `{self._pydist_path}`"
+            f"Extracting `{pydist_file_path}` to `{self._pydist_path}`"
         ):
             self._unzip(
-                zip_file_path=embedded_file_path,
+                zip_file_path=pydist_file_path,
                 destination_dir_path=self._pydist_path,
             )
 
