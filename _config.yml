@@ -6,3 +6,4 @@ relative_links:
   collections: true
 include:
   - README.md
+  - ./docs/py_to_win_app.md
