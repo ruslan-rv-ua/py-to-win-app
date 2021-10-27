@@ -1,4 +1,3 @@
-# theme: jekyll-theme-hacker
 plugins:
   - jekyll-relative-links
 relative_links:
@@ -6,4 +5,6 @@ relative_links:
   collections: true
 include:
   - README.md
-  - py_to_win_app.md
+  - LICENSE.md
+
+theme: jekyll-theme-tactile
