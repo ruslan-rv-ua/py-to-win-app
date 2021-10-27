@@ -44,7 +44,7 @@ Or using pip:
 
 ## Documentation
 
-- [API documentation](http://ruslan.rv.ua/py-to-win-app/)
+- [API documentation](https://github.com/ruslan-rv-ua/py-to-win-app/blob/master/docs/py_to_win_app.md)
 
 ## Examples
 
